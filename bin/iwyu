@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+$HOME/iwyu/build/bin/include-what-you-use                                               \
+    "$@"                                                                                \
+    -I /usr/lib/gcc/x86_64-redhat-linux/9/../../../../include/c++/9                     \
+    -I /usr/lib/gcc/x86_64-redhat-linux/9/../../../../include/c++/9/x86_64-redhat-linux \
+    -I /usr/lib/gcc/x86_64-redhat-linux/9/../../../../include/c++/9/backward            \
+    -I /usr/local/include                                                               \
+    -I /home/jimb/.mozbuild/clang/lib/clang/8.0.0/include                               \
+    -I /usr/include

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+find . \( -name 'obj-*' -o -name '.hg' -o -name '.git' \) -prune \
+     -o -name moz.build -print

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Print the full filename of a sunspider results file, as selected by $1.
+# If $1 is a number, it selects the n'th youngest results file.
+#
+# If $1 is a regexp in /slashes/, it is matched against the results file
+# name. (This works nicely if one renames results files after generating
+# them.)
+#
+# What's really going on is that $1 is a sed address matching a stream of
+# filenames ordered from youngest to oldest.
+
+address=$1; shift
+
+SSDIR=$HOME/sunspider/sunspider
+COMPARE=$SSDIR/sunspider-compare-results
+RESULTS=$SSDIR/sunspider-0.9.1-results
+ls -t $RESULTS/sunspider-results-* | sed -ne "${address}{p;q}"

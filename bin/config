@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+set -eu
+
+cd $(moz findsrctop)
+
+if [ -z "${1:+set}" ]; then
+    target=$(readlink .mozconfig)
+    case "$target" in
+        ../dot-mozconfig-*)
+            echo "$target" | sed -e 's|^../dot-mozconfig-||'
+            ;;
+        *)
+            echo "Unrecognized .mozconfig link contents: $target" >&2
+            exit 1
+            ;;
+    esac
+    exit 0
+fi
+
+config=../dot-mozconfig-$1
+if ! [ -f "$config" ]; then
+    echo "No such dot-mozconfig file: $1" >&2
+    exit 1
+fi
+
+rm -f .mozconfig
+ln -s $config .mozconfig
+

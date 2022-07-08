@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+
+import json
+import re
+import sys
+
+argv = sys.argv[1:]
+pattern = argv.pop(0)
+regex = re.compile(pattern)
+
+for filename in argv:
+    with open(filename, 'r', encoding='utf-8') as f:
+        all_tests = set()
+        matching_tests = set()
+        line_number = 0
+        thread_test_name = dict()
+        for line in f:
+            line = line.rstrip('\n\u2028\u2029')
+            line_number += 1
+            try:
+                parsed = json.loads(line)
+            except:
+                print("{}:{}: failed to parse line: {!r}".format(filename, line_number, line))
+                sys.exit(1)
+
+            thread = parsed.get('thread')
+            action = parsed.get('action')
+
+            if action == 'test_start':
+                thread_test_name[thread] = parsed['test']
+                all_tests.add(thread_test_name[thread])
+            elif action == 'test_end':
+                thread_test_name[thread] = None
+            elif action == 'process_output':
+                output = parsed['data']
+                m = regex.match(output)
+                if m:
+                    print("{}:{}, test {}: {}"
+                          .format(filename, line_number,
+                                  thread_test_name[thread],
+                                  output))
+                    matching_tests.add(thread_test_name[thread])
+
+        if matching_tests:
+            print()
+            print("Matching tests ({} out of {}):".format(len(matching_tests), len(all_tests)))
+            names = list(matching_tests)
+            names.sort()
+            for test in names:
+                print(test)
+
+        if len(matching_tests) < len(all_tests):
+            print()
+            print("Non-matching tests:")
+            names = list(all_tests - matching_tests)
+            names.sort()
+            for test in names:
+                print(test)

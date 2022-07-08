@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -eu
+cd $(moz findsrctop)
+find $PWD/toolkit/devtools \
+     $PWD/browser/devtools/debugger \
+     '(' -name '*.js' -o -name '*.jsm' ')' ! -name '.#*' -print
+
+find $PWD/mobile/android/chrome/content \
+     $PWD/b2g/chrome/content \
+     '(' -name 'dbg-*.js' ')' -print

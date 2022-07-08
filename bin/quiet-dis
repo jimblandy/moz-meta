@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+branches='jmp|call|ja|jae|jb|jbe|je|jge|jl|jle|jne|jnp|jns|jp|js'
+
+o=$1
+dis=${1/%.o/.dis~}
+qd=${1/%.o/.qd~}
+src=${1/%.o/.src~}
+
+objdump --disassemble --reloc $o > $dis
+sed --regexp-extended < $dis \
+      -e 's/^[ 	]*[0-9a-f]+:[ 	]*([0-9a-f][0-9a-f] )*[ 	]*//' \
+      -e 's/('"$branches"').*<(.*)\+.*>/\1 <\2>/' \
+      -e 's/0x[0-9a-f]+/0x/g' \
+| c++filt \
+> $qd
+
+objdump --source --reloc --line-numbers $o > $src

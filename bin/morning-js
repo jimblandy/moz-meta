@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+set -eux
+
+for arg in "$@"; do
+    case "$arg" in
+        qpop)
+            moz safe-pop
+            ;;
+        qpush)
+            hg qpush -a
+            ;;
+        update)
+            hg pull
+            hg update
+            hg identify
+            mkid --prune 'obj-bug' --prune 'js/src/obj~'
+            (cd js/src; mkid)
+            ;;
+        build)
+            pushd js/src
+            ~/mc/bin/build-shell
+            popd
+            ;;
+        build-opt)
+            pushd js/src
+            ~/mc/bin/build-shell --optimize
+            popd
+            ;;
+        bench)
+            top=$PWD
+            pushd ~/sunspider/SunSpider
+            ./sunspider --shell $top/js/src/obj~/js --runs=50
+            popd
+            ;;
+        bench-baseline)
+            top=$PWD
+            pushd ~/sunspider/SunSpider
+            ./sunspider --set-baseline --shell $top/js/src/obj~/js --runs=50
+            popd
+            ;;
+        test)
+            top=$PWD
+            pushd js/src
+            moz js-tests
+            moz keep-at-most 10 failures-*
+            popd
+            ;;
+        test-queue)
+            pushd js/src
+            moz queue-each --remake 'moz js-tests -- --no-progress'
+            popd
+            ;;
+        clean-tests)
+            pushd js/src
+            if [ -d tests ]; then
+                cd tests
+            else
+                cd ../tests
+            fi
+            rm -f failures-*
+            popd
+            ;;
+        *)
+            # Each subdirectory of ~/mc is a command meaning "cd into me"!
+            if [ -d ~/mc/$arg ]; then
+                cd ~/mc/$arg
+            else
+                echo "Unrecognized command: $arg" >&2
+                exit 1
+            fi
+            ;;
+    esac
+done

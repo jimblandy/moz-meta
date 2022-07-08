@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -eu
+
+am=/home/jimb/actionmonkey
+srcdir=$am/jsuni/js
+inst=$(cd ..; pwd)/inst-js
+nspr=$(cd ../inst-nspr/bin; pwd)
+
+set -x
+
+rm -f config.static
+(cd $srcdir; autoconf-2.13)
+$srcdir/configure --prefix=$inst --with-nspr-config=$nspr/nspr-config
+make -j4

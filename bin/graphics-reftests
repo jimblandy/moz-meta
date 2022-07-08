@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+set -eu
+
+case "${1-}" in
+    --xephyr)
+        prefix='moz in-xephyr '
+        ;;
+
+    --no-xephyr)
+        prefix=
+        ;;
+
+    *)
+        echo "Pass --xephyr or --no-xephyr." >&2
+        exit 1
+        ;;
+esac
+shift
+
+$prefix mach reftest --setpref gfx.webrender.enabled=true "$@" |& tee log~
+
+echo
+echo "Unexpected unexpected failures:"
+grep UNEXPECTED-FAIL log~ \
+| grep --fixed-strings --invert-match --line-number --with-filename \
+       -e 'layout/reftests/async-scrolling/curtain-effect-1.html == layout/reftests/async-scrolling/curtain-effect-1-ref.html' \
+       -e 'layout/reftests/async-scrolling/perspective-scrolling-1.html == layout/reftests/async-scrolling/perspective-scrolling-1-ref.html' \
+       -e 'layout/reftests/async-scrolling/position-sticky-transformed-in-scrollframe-1.html == layout/reftests/async-scrolling/position-sticky-transformed-in-scrollframe-1-ref.html' \
+       -e 'layout/reftests/text-decoration/complex-decoration-style-quirks.html == layout/reftests/text-decoration/complex-decoration-style-quirks-ref.html' \
+       -e 'layout/reftests/text-decoration/complex-decoration-style-standards.html == layout/reftests/text-decoration/complex-decoration-style-standards-ref.html' \
+       -e 'layout/reftests/text/1463020-letter-spacing-text-transform-1.html == layout/reftests/text/1463020-letter-spacing-text-transform-1-ref.html' \
+       -e 'layout/reftests/text/1463020-letter-spacing-text-transform-2.html == layout/reftests/text/1463020-letter-spacing-text-transform-2-ref.html' \
+       -e 'layout/reftests/text/color-opacity-rtl-1.html == layout/reftests/text/color-opacity-rtl-1-ref.html' \
+       -e 'layout/reftests/transform-3d/1637067-1.html == layout/reftests/transform-3d/1637067-1-ref.html'

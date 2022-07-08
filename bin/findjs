@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+find . \
+     '(' -name .hg -o -name 'obj-*' -o -name 'obj~' ')' -prune \
+     -o '(' -name '*.js' -o -name '*.jsm' -o -name '*.sjs' ')' -print

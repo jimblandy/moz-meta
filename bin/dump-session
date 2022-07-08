@@ -1,0 +1,23 @@
+#!/usr/bin/env python2.6
+
+import json
+
+sessions = json.loads(open("/home/jimb/.mozilla/firefox/brbwdw82.default/sessionstore.js").read())
+urls = []
+groups = []
+for w in sessions['windows']:
+    for tab in w['tabs']:
+        latest = tab['entries'][0]
+        summary = {}
+        summary['url'] = latest['url']
+        if 'extData' in tab and 'tabview-tab' in tab['extData']:
+            tabview_tab = json.loads(tab['extData']['tabview-tab'])
+            if tabview_tab:
+                summary['groupID'] = tabview_tab['groupID']
+        urls.append(summary)
+        
+    tabview_group = json.loads(w['extData']['tabview-group'])
+    for group in tabview_group.values():
+        groups.append({'id':group['id'], 'title':group['title']})
+        
+print json.dumps({'urls':urls, 'groups':groups}, indent=2)

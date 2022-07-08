@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Rebuild xpcshell after a SpiderMonkey change.
+
+set -eu
+
+make -j8 -C js/src
+make -j8 -C toolkit/library

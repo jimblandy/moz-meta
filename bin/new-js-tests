@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+exec moz js-tests "$@" js1_7 js1_8 js1_8_1 js1_8_5

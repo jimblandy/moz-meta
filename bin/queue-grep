@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+cd /home/jimb/mc
+grep "$@" */.hg/patches/* b/*/src/.hg/patches/*

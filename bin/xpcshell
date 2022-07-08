@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+set -eu
+eval "$(args "$0" -f gdb -r -u "Run xpcshell from current tree." -- "$@")"
+
+wrapper=
+if $gdb; then
+    wrapper='gdb'
+    if [ "${EMACS:-}" = t ]; then
+        wrapper="${wrapper} --fullname"
+    fi
+    wrapper="${wrapper} --args"
+fi
+
+obj=$(find-build)
+echo "obj='$obj'"
+set -v
+# We try to imitate what testing/xpcshell/runxpcshelltests.py passes:
+# -g: passed to XPCShellDirProvider::SetGREDir
+# -a: passed to XPCShellDirProvider::SetAppDir
+# -m: set JSOPTION_METHODJIT
+# -n: set JSOPTION_TYPE_INFERENCE
+# -s: set JSOPTION_STRICT
+LD_LIBRARY_PATH=$obj/dist/bin:/usr/local/lib \
+exec $wrapper $obj/dist/bin/xpcshell -g $obj/dist/bin -a $obj/dist/bin -m -n -s "$@"

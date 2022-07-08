@@ -1,0 +1,10 @@
+# -*- mode: sh -*-
+
+set -eu
+: $nspr_src $nspr_obj $nspr_inst
+
+mkdir $nspr_obj
+cd $nspr_obj
+$nspr_src/configure --prefix=$nspr_inst
+make
+make install

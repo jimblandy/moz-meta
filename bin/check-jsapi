@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+obj~/js/src/jsapi-tests/jsapi-tests "$@"

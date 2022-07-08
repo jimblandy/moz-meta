@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+mach try -b do -p all -u jsreftest,cppunit,jittests,jittest-1,jittest-2,mochitest-dt,jsreftest-1,jsreftest-2,jsreftest-3,jsreftest-4,jsreftest-5,jsreftest-6 -t none

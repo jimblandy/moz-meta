@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+set -eu
+
+naga_flags=
+if [ "$1" == "--dump-ir" ]; then
+    naga_flags=--dump-ir
+    shift
+fi
+
+case "$1" in
+    *.spv)
+        base=${1/.spv}
+        ;;
+    *.spvasm)
+        base=${1/.spvasm}
+        spirv-as --target-env vulkan1.0 $base.spvasm -o $base.spv
+        ;;
+    *)
+        echo "Unrecognized input extension: $1" >&2
+        exit 1
+        ;;
+esac
+shift
+
+# Assemble and validate the input.
+spirv-val $base.spv
+echo "spirv-val approves"
+
+# See what Naga thinks of it.
+naga $naga_flags $base.spv $base.txt $base.dot "$@"
+dot -Tpng $base.dot -o tmp.png && mv tmp.png $base.png
+cat $base.txt

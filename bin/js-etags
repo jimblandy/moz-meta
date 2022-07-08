@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+(
+    find . \
+         -name 'obj*~' -prune \
+         -o -name 'xpconnect' -prune \
+         -o \( -name '*.cpp' -o -name '*.c' -o -name '*.py' \) \
+         -print
+    find . \
+         -name 'obj*~' -prune \
+         -o -name 'xpconnect' -prune \
+         -o -name '*.h' -print
+) \
+| etags --regex='/.*JSD?_\(PUBLIC\|FRIEND\)_API(.*)[ \n\t]*\([a-zA-Z0-9_]+\)/\2/m' \
+        --regex='/.*\(struct\|class\).*JSD?_\(PUBLIC\|FRIEND\)_API(\(.*\))/\3/m' \
+        -

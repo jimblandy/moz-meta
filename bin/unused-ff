@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+set -eu
+
+# Find all processes running programs from $HOME/moz/mc*. Also look for
+# /usr/bin/find, as a sanity check.
+p=$(/usr/bin/find /proc/[0-9]*/exe -maxdepth 0 -user $(id -u) -ls \
+    | egrep -e '/proc/[0-9]+/exe -> (/usr/bin/find|/home/jimb/moz)')
+
+if ! (echo "$p" | grep --quiet /usr/bin/find); then
+    echo "Suspicious: 'find' couldn't find itself running, so I doubt we could find firefox." >&2
+    exit 1
+fi
+
+if ! (echo "$p" | grep --quiet /home/jimb/moz/); then
+    # Both are free; choose the older firefox, so a subsequent 'moz
+    # newer-ff' won't pick the one we're building.
+    t1=$(date +%s --reference /home/jimb/moz/mc/obj-rel/dist/bin/firefox) || t1=9999999999
+    t2=$(date +%s --reference /home/jimb/moz/mc2/obj-rel/dist/bin/firefox) || t2=9999999999
+    if [ $t1 -lt $t2 ]; then
+        echo /home/jimb/moz/mc2
+    else
+        echo /home/jimb/moz/mc
+    fi
+elif ! (echo "$p" | grep --quiet /home/jimb/moz/mc/); then
+    echo /home/jimb/moz/mc
+elif ! (echo "$p" | grep --quiet /home/jimb/moz/mc2/); then
+    echo /home/jimb/moz/mc2
+else
+    echo "All Firefox build directories busy." >&2
+    exit 1
+fi

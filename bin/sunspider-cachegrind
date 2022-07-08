@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+set -eu
+
+u="Run sunspider benchmarks under valgrind's cachegrind tool using ./obj~/js/src/js as the shell.
+--shell=NAME specifies which shell to run; default obj~/js/src/js.
+--args=ARGS specifies additional arguments to pass to the shell. (def. '-j -m -p')
+--suffix=X specifies a suffix for the cachegrind output file, to identify what you're measuring."
+eval "$(args "$0" -k suffix=%p args='-j -m -p' shell=obj~/js/src/js -u "$u" -- "$@")"
+
+if ! [ -f jsapi.cpp ]; then
+    echo "Run in \$SRC/js/src." >&2
+    exit 1
+fi
+
+shell=$(cd $(dirname $shell); pwd)/$(basename $shell)
+cachegrind_out="$PWD/cachegrind.out.${suffix}"
+
+# Complain if the shell was built with debugging check, or without
+# optimization.
+autoconf_mk=$(dirname $shell)/config/autoconf.mk
+if [ -f "$autoconf_mk" ]; then
+    debug="$(sed -ne 's/^MOZ_DEBUG[ \t]*=[ \t]*//p' < "$autoconf_mk")"
+    if [ "$debug" ]; then
+        echo "Shell $shell built with debugging checks enabled." >&2
+        echo "It's not meaningful to benchmark such shells." >&2
+        exit 1
+    fi
+    optimize="$(sed -ne 's/^MOZ_OPTIMIZE[ \t]*=[ \t]*//p' < "$autoconf_mk")"
+    if [ -z "$optimize" ]; then 
+        echo "Shell $shell built without optimization." >&2
+        echo "It's not meaningful to benchmark such shells." >&2
+        exit 1
+    fi
+fi
+
+SSDIR=$HOME/sunspider/sunspider
+SS=$SSDIR/sunspider
+SSRESULTS=$SSDIR/sunspider-0.9.1-results
+
+set -x
+
+pushd $SSDIR
+time valgrind --tool=cachegrind --branch-sim=yes --smc-check=all        \
+              --cachegrind-out-file="${cachegrind_out}"                 \
+              $shell $args                                              \
+              -f $SSRESULTS/sunspider-test-prefix.js                    \
+              -f $SSDIR/resources/sunspider-standalone-driver.js

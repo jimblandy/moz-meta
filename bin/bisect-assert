@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+set -eux
+
+if [ $# -lt 2 ]; then
+    echo 'Usage: bisect-assert [--fixed] MESSAGE COMMAND' >&2
+    exit 1
+fi
+
+if ! [ -f config.status ]; then
+    echo 'Run in build directory.' >&2
+    exit 1
+fi
+
+present=--bad
+absent=--good
+if [ "$1" = "--fixed" ]; then
+    shift
+    present=--good
+    absent=--bad
+fi
+    
+msg=$1; shift
+js_cmd=("$@")
+
+if ! make -j4 > /dev/null; then
+    set -x
+    hg bisect --skip
+    exit 0
+fi
+
+set +ex
+stderr="$(eval "${js_cmd[@]}" 2>&1 > /dev/null)"
+status=$?
+set -ex
+
+if expr + "$status" = 134 '&' match + "$stderr" "Assertion failure:.*$msg"; then
+    set -x
+    hg bisect $present
+else
+    set -x
+    hg bisect $absent
+fi

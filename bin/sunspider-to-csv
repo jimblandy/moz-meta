@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -eu
+
+results=$1; shift
+
+SSDIR=$HOME/sunspider/sunspider
+COMPARE=$SSDIR/sunspider-compare-results
+RESULTS=$SSDIR/sunspider-0.9.1-results
+
+jsshell=$PWD/obj~/js/src/js
+if [ ! -x "$jsshell" ]; then
+   echo "Couldn't find shell '$jsshell'; run in js/src." >&2
+   exit 1
+fi
+
+$jsshell -f "$(moz sunspider-results-file "${results}")" \
+         -e '
+var allcolumns = {}
+for each (run in output) {
+    for (name in run)
+        allcolumns[name] = true;
+}
+var columnnames = Object.getOwnPropertyNames(allcolumns).sort();
+
+// Header line.
+print(columnnames.join(","))
+
+// Data lines.
+for each (run in output) {
+    var row=[];
+    for each (column in columnnames)
+        row.push(run[column]);
+    print(row.join(","));
+}
+'

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -eu
+(
+    cd jit-test/tests
+    find .                                                                              \
+         -type f                                                                        \
+         -name '*.js'                                                                   \
+         -exec egrep -l '(setBreakpoint|assertOffsetColumns|testDebuggerHooksNX)' {} +  \
+    | sed 's|^\./||'
+) > ~/moz/bptests

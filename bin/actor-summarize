@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+
+import subprocess
+import sys
+
+file = open('../actor-changeset-deltas', 'r')
+
+class Entry(object):
+    def __init__(self, line):
+        line = line.strip()
+        [self.changeset, self.delta, self.author] = line.split(':', 3)
+        self.delta = int(self.delta)
+
+totals = {}
+for line in file:
+    entry = Entry(line)
+    if entry.delta != 0:
+        if entry.author in totals:
+            (total, changesets) = totals[entry.author]
+        else:
+            (total, changesets) = (0, [])
+        total += entry.delta
+        changesets.append(entry.changeset)
+        totals[entry.author] = (total, changesets)
+
+#for (author, (count, changesets)) in totals.items():
+for (author, (total, changesets)) in sorted(totals.items(),
+                                            key = lambda keyvalue: keyvalue[1][0]):
+    print("{1} {0}".format(author, total))
+    for changeset in changesets:
+        for line in subprocess.check_output(['hg', 'log', '-r', changeset]).decode('utf-8').splitlines():
+            if line:
+                print('    {0}'.format(line))
+            else:
+                print('')

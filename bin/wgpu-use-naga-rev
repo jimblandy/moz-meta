@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if ! [ -f wgpu-core/Cargo.toml ]; then
+    echo "Run in wgpu workspace top source directory." >&2
+    exit 1
+fi
+
+naga=/home/jimb/rust/naga
+if ! [ -f "$naga/tests/snapshots.rs" ]; then
+    echo "Naga source directory doesn't seem to be: $naga" >&2
+    exit 1
+fi
+
+repo=gfx-rs
+case "$1" in
+    "--jimb")
+        repo=jimblandy
+        ;;
+esac
+
+rev=$1; shift
+case "$(cd $naga && git rev-parse --symbolic-full-name "$rev" 2>/dev/null || echo invalid)" in
+    invalid) 
+        echo "No revision '$rev' in $naga" >&2
+        exit 1
+        ;;
+    refs/*)
+        kind=branch
+        ;;
+    *)
+        kind=rev
+        ;;
+esac
+
+rule='
+    /^\[.*dependencies.naga\]/,/^$/ {
+        /^git *=/ {
+            igit = "https://github.com/'"$repo"'/naga"
+            d
+        }
+        /^(rev|branch) *=/ {
+            i'$kind' = "'"$rev"'"
+            d
+        }
+    }
+'
+
+find . \
+     -name target -prune -false \
+     -o -name .git -prune -false \
+     -o -name Cargo.toml -exec sed -i~ -Ee "$rule" {} +
+

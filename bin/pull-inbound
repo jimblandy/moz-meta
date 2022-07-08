@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+exec pull-and-update-bookmark inbound

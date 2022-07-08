@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -eu
+usage='Delete all but the newest N files given.'
+eval "$(args keep-at-most n -r -u "$usage" -- "$@")"
+
+[ "$n" -ge 1 ] || {
+    echo "at-most: bad number of files to keep: $n" >&2
+    exit 1
+}
+
+rm -f $(ls -t "$@" | sed -e "1,${n}d")

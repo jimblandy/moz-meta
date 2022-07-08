@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -eu
+
+name=$1
+
+pre_id="$(hg identify -r tip)"
+hg pull "$name"
+post_id="$(hg identify -r tip)"
+
+if [ "$pre_id" != "$post_id" ]; then
+   hg bookmark -r tip -f "$name"
+fi
+
+hg update "$name"

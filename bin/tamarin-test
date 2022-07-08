@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if ! [ -x shell/avmshell ]; then
+   (
+      echo "Can't find ./shell/avmshell executable."
+      echo 'Run this script in a tamarin build dir.'
+   ) >&2
+   exit 1
+fi
+
+first () {
+    for f; do
+        if [ -f "$f" ]; then
+            echo "$f"
+            return
+        fi
+    done
+
+    echo "Couldn't find$(if [ $# != 1 ]; then echo ' any of'; fi): $@" >&2
+    exit 2
+}
+
+echo $(false)
+export AVM=$(first $PWD/shell/avmshell)
+export ASC=$(first $HOME/asc/asc/lib/asc.jar)
+
+topsrcdir=$(sed -n -e 's|topsrcdir=||p' $(first Makefile))
+cd $topsrcdir
+
+export GLOBALABC=$(first $PWD/core/builtin.abc $PWD/core/builtin_full.abc)
+
+cd test/acceptance
+
+python runtests.py -f "$@"

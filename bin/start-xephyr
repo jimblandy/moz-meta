@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+(
+    echo "To run programs in Xephr window, set:"
+    echo "DISPLAY=:5"
+    echo "Or run 'moz in-xephyr COMMAND'."
+) >&2
+Xephyr -screen 1920x1080 :5

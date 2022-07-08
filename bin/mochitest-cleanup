@@ -1,0 +1,11 @@
+#!/bin/env bash
+
+set -eu
+
+pids=$(echo $(pgrep ssltunnel) $(pgrep xpcshell))
+if [ -n "$pids" ]; then
+    echo "killing $pids"
+    kill $pids
+else
+    echo "no ssltunnel or xpcshell processes"
+fi

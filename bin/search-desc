@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# Don't consider changesets before 500000, just because it's slow and boring.
+eval "hg log -r 'reverse(500000: and desc(\"$@\"))' --template phases"

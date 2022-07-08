@@ -1,0 +1,7 @@
+#!/bin/env bash
+
+exec {scriptout}>&1
+find devtools -type f -name '*.js' -print0 \
+    | xargs -0 grep 'ActorClass(' \
+    | tee /dev/fd/$scriptout \
+    | wc -l

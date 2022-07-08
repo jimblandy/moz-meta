@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+hg log -r '500000: and desc("'"$*"'")' --template phases

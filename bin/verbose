@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -eux
+
+if ! [ -f jsapi.cpp ]; then
+    echo "Run in \$SRC/js/src." >&2
+    exit 1
+fi
+
+JS=$PWD/obj~/js
+
+SSDIR=$HOME/sunspider/SunSpider
+SS=$SSDIR/sunspider
+SSRUNS=0
+SSARGS='--args=-j'
+
+(
+    export TRACEMONKEY=verbose,stats
+    $JS -j trace-test.js 
+    moz bare-sunspider -j
+) > ${VARIANT:+${VARIANT}.}verbose~

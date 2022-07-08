@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+set -eu
+
+stem1=15.2.3.6-dictionary-redefinition
+stem2=15.2.3.6-middle-redefinition
+parts=16
+
+cd ecma_5/Object
+rm ${stem1}-*-of-*.js
+rm ${stem2}-*-of-*.js
+
+sed < jstests.list > jstests.list.tmp~ \
+    -e "/${stem1}-.*-of-.*\.js/d" \
+    -e "/${stem2}-.*-of-.*\.js/d"
+
+make_name() {
+    printf %s-%02d-of-%02d.js "$1" "$2" "$3"
+}
+
+for ((i=1; i<=parts; i++)); do
+    cat > $(make_name "$stem1" $i $parts) <<EOF
+// Any copyright is dedicated to the Public Domain.
+// http://creativecommons.org/licenses/publicdomain/
+
+load("ecma_5/Object/defineProperty-setup.js");
+runDictionaryPropertyPresentTestsFraction($i, $parts);
+EOF
+    echo "skip-if(!xulRuntime.shell) script $(make_name "${stem1}" $i $parts) # uses shell load() function" >> jstests.list.tmp~
+done
+
+for ((i=1; i<=parts; i++)); do
+    cat > $(make_name "$stem2" $i $parts) <<EOF
+// Any copyright is dedicated to the Public Domain.
+// http://creativecommons.org/licenses/publicdomain/
+
+load("ecma_5/Object/defineProperty-setup.js");
+runNonTerminalPropertyPresentTestsFraction($i, $parts);
+EOF
+    echo "skip-if(!xulRuntime.shell) script $(make_name "${stem2}" $i $parts) # uses shell load() function" >> jstests.list.tmp~
+done
+
+mv jstests.list.tmp~ jstests.list

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Like find, but automatically ignore Mercurial metadata and build trees
+
+# Skip initial path arguments, so we can insert our magic at the start
+# of the options.
+paths=()
+while case "${1--}" in (-* | !) false;; (*) true;; esac do
+    paths=("${paths[@]}" "$1")
+    shift
+done
+exec find "${paths[@]}" \
+          '(' -name .hg -o -name .git ')' -type d -prune \
+          -o '(' -name 'obj-*' -o -name '*~' ')' -type d -prune \
+          -o '(' "${@--true}" ')'

@@ -1,0 +1,10 @@
+# -*- mode: sh -*-
+
+set -eu
+
+: $jsuni_src $rev $repo
+
+hg clone -r $rev $repo $jsuni_src
+cd $jsuni_src
+python client.py checkout
+make -f client.mk configure-files || true

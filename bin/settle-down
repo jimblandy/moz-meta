@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+big_pids="$(pgrep emacs) \
+          $(pgrep thunderbird) \
+          $(pgrep rhythmbox) \
+          $(pgrep Telegram) \
+          $(pgrep signal-desktop) \
+          $(pgrep -f tracker-miner-fs) \
+          $(pgrep tracker-extract) \
+          $(pgrep zoom) \
+         "
+big_pgroups="$(pgrep GeckoMain | sed -r 's/[0-9]+/-&/g')"
+
+set -x
+performance
+kill -STOP $big_pids $big_pgroups
+"$@"; saved_status=$?
+kill -CONT $big_pids $big_pgroups
+powersave
+exit $saved_status

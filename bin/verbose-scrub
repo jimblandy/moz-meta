@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+scrub () {
+    local variant=$1
+    sed < $variant.verbose~ > $variant.verbose.scrubbed~ \
+        -r \
+        -e 's/cycles=[0-9]+/cycles=<N>/' \
+        -e 's|\(#0x[0-9a-f]+\) // =1.0|(#<static addr>) // =1.0|' \
+        -e '/xorpd/s|\[0x0x[0-9a-f]+\]|[<static addr>]|' \
+        -e '/addsd/s|,0x[0-9a-f]+ // =214748|,<static addr> // =214748|' \
+        -e '/^abort:/s|[0-9]+:|<line>:|' \
+        -e 's/0x[0-9a-fA-F]+/<hex>/g'
+
+    grep -i abort < $variant.verbose.scrubbed~ > $variant.aborts~
+    grep 'entering trace' < $variant.verbose.scrubbed~ > $variant.enters~
+    grep 'leaving trace' < $variant.verbose.scrubbed~ > $variant.leaving~
+}
+
+scrub pop & scrub push

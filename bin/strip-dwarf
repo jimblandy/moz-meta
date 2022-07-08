@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -eu
+
+obj=$1
+build=$obj/toolkit/library/build
+lib=$build/libxul.so
+if ! [ -f "$lib" ]; then
+    echo "No libxul.so in $build" >&2
+    exit 1
+fi
+
+cp "$lib" "$lib-with-dwarf"
+~/.mozbuild/clang/bin/llvm-strip --no-strip-all --strip-debug "$lib"

@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+set -eu
+
+# Enable job control.
+set -m
+
+case "${1:-}" in
+    "-server-log")
+        shift
+        server_log=$1
+        shift
+        ;;
+esac
+
+(
+    if [ "${server_log:+set}" ]; then
+        exec > $server_log 2>&1
+    fi
+    exec Xvfb -ac :2 -screen 0 1280x1024x24
+) &
+export DISPLAY=:2.0
+
+sleep 0.5
+
+set +e
+"$@"
+status=$?
+set -e
+
+kill %1
+wait %1
+exit $status

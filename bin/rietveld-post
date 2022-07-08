@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Create Rietveld issue based on the next patch in the Mercurial queue.
+#
+# Run at the top of a .hg tree, with 'hg qnext' showing the patch to be
+# submitted. The first line of the patch should be the title for the
+# Reitveld issue; the rest of the initial text, up to the beginning of the
+# diff, is submitted as a description. (A blank line between title and
+# description is trimmed.)
+#
+# If the description contains the word TODO, then we complain and don't
+# submit the patch.
+
+set -eu
+
+if ! [ -d .hg/patches ]; then
+    echo "Run in top directory of mercurial repository." >&2
+    exit 1
+fi
+
+if [ "$(hg status)" ]; then
+    echo "Working directory not clean." >&2
+    exit 1
+fi
+
+next_name=$(hg qnext)
+if [ "$next_name" = "all patches applied" ]; then
+    echo "All patches applied.  No patch to upload." >&2
+    exit 1
+fi
+
+next=.hg/patches/$next_name
+if ! [ -f "$next" ]; then
+    echo "Cannot find next patch file: $next" >&2
+    exit 1
+fi
+
+echo "Posting patch: $next_name"
+title=$(sed -ne '1p' < $next)
+description="$(sed -n -e '1d' -e '/^diff/q' -e '2{/^$/d}' -e 'p' < $next)"
+trap "rm -f /tmp/rietveld-post-description" 0 1 2 15
+echo "$description" > /tmp/rietveld-post-description
+if grep TODO /tmp/rietveld-post-description > /dev/null; then
+    echo "Description file contains TODO items." >&2
+    exit 1
+fi
+patch -p1 < $next
+hg addremove
+~/breakpad/upload.py                            \
+    --server=breakpad.appspot.com               \
+    --title="$title"                            \
+    --file=/tmp/rietveld-post-description       \
+    --rev tip                                   \
+    "$@"
+hg revert .
+hg status -un | xargs rm

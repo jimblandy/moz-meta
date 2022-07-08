@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -eu
+
+hg checkout $1
+hg rebase -d central
+cd $(hg root)/js/src
+moz build-shell

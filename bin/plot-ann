@@ -1,0 +1,184 @@
+#!/usr/bin/env python
+
+import sys, os
+import difflib
+import re
+import math
+import Image, ImageDraw, ImageFont
+
+def die(msg):
+    print >> sys.stderr, msg
+    sys.exit(1)
+
+if len(sys.argv) != 5:
+    die("usage: %s ANN FILE1 FILE2 OUT" % (os.path.basename(sys.argv[0])))
+
+annotation_dir = sys.argv[1]
+if not os.path.isdir(annotation_dir):
+    die("not a directory: %s" % (annotation_dir))
+
+class Annfile(object):
+
+    annpat = re.compile(r"\s*(?P<count>\d+)\s+[0-9.e-]+\s+:")
+
+    def __init__(self, path):
+        # Find the full, symlink-free version of path, and make sure
+        # we can find that file.
+        self.src = os.path.realpath(os.path.join (os.getcwd(), path))
+        if not os.path.isfile(self.src):
+            die("source file not found: %s" % (self.src))
+
+        # Find the corresponding file in the opannotate output tree.
+        # A bug in os.path.relpath means that relpath(src, '/') doesn't
+        # do the trick here.  Also, Ubuntu Python3 doesn't seem to have Image.
+        rel_src = self.src[1:]
+        self.ann = os.path.join (annotation_dir, rel_src)
+        if not os.path.isfile(self.ann):
+            die("annotated source file not found: %s" % (self.ann))
+
+    def readcounts(self):
+        f = open(self.ann)
+        self.counts=[0] # indexed by line number, 1-based
+        try:
+            self.max_count = 0
+            lineno = 0
+            for line in f:
+                lineno = lineno + 1
+                m = self.annpat.match(line)
+                if m:
+                    c = int(m.group('count'))
+                    self.counts.append(c)
+                    if c > self.max_count:
+                        self.max_count = c
+                else:
+                    self.counts.append(0)
+                        
+        finally:
+            f.close()
+
+files = map(Annfile, sys.argv[2:4])
+out = sys.argv[4]
+
+for f in files:
+    f.readcounts()
+
+# Align the two versions of the file.
+d = difflib.Differ()
+fds = (open(f.src) for f in files)
+lines = [fd.readlines() for fd in fds]
+alignment = d.compare(lines[0], lines[1])
+# Throw away the intra-line comparison notes.
+alignment = [a for a in alignment if a[0] != '?']
+for fd in fds:
+    fd.close()
+
+# Choose dimensions for the plot.  The plot has one horizontal line
+# per line in the alignment.  The width is fixed, with a center area
+# of specified proportion for plot data; line numbers appear in
+# gutters on either side.
+overall = (1200, len(alignment))
+plot_mid = overall[0] / 2
+plot_side_width = overall[0] * 4 / 5 / 2
+
+class colors():
+    background=(255,255,255)
+    midline=(0,0,0)
+    grid=(200,255,255)
+    common=(0,0,0)
+    unique0=(0,255,0)
+    unique1=(255,0,0)
+    sourceline=(0,0,0)
+
+# The maximum count appearing in the annotations determines the
+# horizontal scale of the plot area.
+max_count = max([f.max_count for f in files])
+
+# Given a count, return its distance from the plot center line.
+factor = float(plot_side_width) / max_count
+def scale(c):
+    return c * factor
+
+# Create an image of the appropriate size.
+im = Image.new('RGB', overall, colors.background)
+dr = ImageDraw.Draw(im)
+font = ImageFont.truetype('/usr/share/fonts/truetype/ttf-bitstream-vera/Vera.ttf',
+                          12)
+
+# Don't ask me why these draw one-pixel lines, but they seem to.
+def hline(x1, x2, y, fill):
+    [x1, x2] = sorted([x1, x2])
+    if x1 < x2:
+        dr.rectangle([(x1,y),(x2,y)], outline=None, fill=fill)
+def vline(x, y1, y2, fill):
+    [y1, y2] = sorted([y1, y2])
+    if y1 < y2:
+        dr.rectangle([(x,y1),(x,y2)], outline=None, fill=fill)
+def label(pos, text):
+    dr.text(pos, text, font=font, fill=colors.sourceline)
+
+# A line down the center.
+vline(plot_mid, 0, overall[1], colors.grid)
+
+# graph lines at some power of ten that gives us a reasonable
+# number of lines.
+l10 = math.log(max_count, 10)
+if math.modf(l10)[0] < 0.2:
+    grid = int(math.pow(10, int(l10) - 1))
+else:
+    grid = int(math.pow(10, int(l10)))
+
+for dist in range(grid, max_count, grid):
+    s = scale(dist)
+    vline(plot_mid - s, 0, overall[1], colors.grid)
+    vline(plot_mid + s, 0, overall[1], colors.grid)
+
+# Which direction do each file's counts go in from the midline?
+files[0].dir = -1
+files[0].unique_color = colors.unique0
+files[1].dir = 1
+files[1].unique_color = colors.unique1
+
+# Traverse the alignment, plotting data and line numbers.
+for f in files: f.line = 0
+y=-1
+for line in alignment:
+    y = y + 1
+    if line[0] == ' ':   files[0].enable = True;  files[1].enable = True
+    elif line[0] == '-': files[0].enable = True;  files[1].enable = False
+    elif line[0] == '+': files[0].enable = False; files[1].enable = True
+    else: die("alignment line starts with unexpected char: %s", (line))
+    for f in files:
+        if f.enable:
+            f.line = f.line + 1
+            f.this_count = f.counts[f.line]
+            f.this_scaled_count = scale(f.this_count)
+    sm = min([f.this_scaled_count for f in files if f.enable])
+    for f in files:
+        if f.enable:
+            # Draw line number marker, if needed.
+            if f.line % 100 == 0:
+                hline(plot_mid, plot_mid + plot_mid * f.dir, y, colors.grid)
+                label ((plot_mid + (plot_mid - 100) * f.dir, y), str(f.line))
+            elif f.line % 20 == 0:
+                start = plot_side_width * 4 / 32
+                end   = plot_side_width * 6 / 32
+                hline(plot_mid + start * f.dir,
+                      plot_mid + end   * f.dir,
+                      y, colors.grid)
+            elif f.line % 5 == 0:
+                start = plot_side_width * 4 / 32
+                end   = plot_side_width * 5 / 32
+                hline(plot_mid + start * f.dir,
+                      plot_mid + end   * f.dir,
+                      y, colors.grid)
+            # Plot the common count.
+            hline(plot_mid, plot_mid + sm * f.dir, y, colors.common)
+            # Plot the unique counts.
+            hline(plot_mid + sm * f.dir,
+                  plot_mid + f.this_scaled_count * f.dir, y, f.unique_color)
+
+# Show what we've got thus far.
+im.show()
+
+# Save to the given output file.
+im.save(out, optimize=True)

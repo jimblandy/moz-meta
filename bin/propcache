@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -eux
+
+hg update ef324cc3103d
+# hg qpush propcache-meter.patch
+
+moz build-shell
+# rm -f /tmp/propcache.stats
+TRACEMONKEY=stats obj~/js -j trace-test.js > ~/mc/tracemonkey.stats.popped
+# cp /tmp/propcache.stats ~/mc/propcache.stats.popped
+
+
+# hg qpop -a
+hg update d1a4ee3d0c59
+# hg qpush propcache-meter.patch
+
+moz build-shell
+# rm -f /tmp/propcache.stats
+TRACEMONKEY=stats obj~/js -j trace-test.js > ~/mc/tracemonkey.stats.pushed
+# cp /tmp/propcache.stats ~/mc/propcache.stats.pushed

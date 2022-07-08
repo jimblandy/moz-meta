@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+source $(dirname $0)/sunspider-common
+
+u="Run sunspider benchmarks using ./obj~/js/src/js as the shell.
+--shell=NAME specifies which shell to run.
+--runs=N specifies the number of sunspider runs to perform.
+--warmup=N specifies the number of warmup runs (results are ignored).
+--args=ARGS specifies additional arguments to pass to the shell. (def. '-m -n')
+--sleep sleeps for 90 seconds to let the CPU cool before running the tests.
+If the environment variable BASELINE is set, pass --set-baseline to
+SunSpider."
+eval "$(args "$0" -f sleep -k tests runs=20 warmup=1 args='-m -n' shell=obj~/js/src/js -u "$u" -- "$@")"
+
+if ! [ -f jsapi.cpp ]; then
+    echo "Run in \$SRC/js/src." >&2
+    exit 1
+fi
+
+shell=$(cd $(dirname $shell); pwd)/$(basename $shell)
+
+# Complain if the shell was built with debugging check, or without
+# optimization.
+autoconf_mk=$(dirname $shell)/config/autoconf.mk
+if [ -f "$autoconf_mk" ]; then
+    debug="$(sed -ne 's/^MOZ_DEBUG[ \t]*=[ \t]*//p' < "$autoconf_mk")"
+    if [ "$debug" ]; then
+        echo "Shell $shell built with debugging checks enabled." >&2
+        echo "It's not meaningful to benchmark such shells." >&2
+        exit 1
+    fi
+    optimize="$(sed -ne 's/^MOZ_OPTIMIZE[ \t]*=[ \t]*//p' < "$autoconf_mk")"
+    if [ -z "$optimize" ]; then 
+        echo "Shell $shell built without optimization." >&2
+        echo "It's not meaningful to benchmark such shells." >&2
+        exit 1
+    fi
+fi
+
+if [ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ]; then
+    if [ "$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)" != "performance" ]; then
+        echo "You probably want to run 'performance' to set the cpu governor." >&2
+        exit 1
+    fi
+fi
+
+set -x
+
+pushd $SSDIR
+if $sleep; then
+    sleep 90 # cool off CPU
+fi
+eval "taskset 4 '$SS' --shell='$shell' --runs=$runs --warmup=$warmup ${args:+--args=\"$args\"} ${tests:+--tests=\"$tests\"} ${BASELINE:+--set-baseline}"

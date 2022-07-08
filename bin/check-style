@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+make -C obj~/js/src check-style

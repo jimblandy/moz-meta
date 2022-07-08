@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+mach run --debug "$@"
+# mach run --debugger gdb --debugger-args ' --fullname --args' "$@"

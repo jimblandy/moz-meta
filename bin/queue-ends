@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+set -eu
+u="Evaluate the shell command 'ARG ...' with all mercurial queue patches
+popped, and then again with all patches pushed.  For the first run,
+set the environment variable VARIANT to 'pop', and set BASELINE to
+'true'.  For the second run, set VARIANT to 'push' and leave BASELINE
+unset.
+
+With the --push-first option, run the commands with all patches pushed first,
+then with all patches popped.  BASELINE is still set on the first run.
+
+With --reconfigure, delete, reconfigure and build from scratch using 'moz
+build-shell'.
+
+BUILD-OPTS are passed to the 'build-shell' command."
+eval "$(args "$0" -f reconfigure push-first -k build-opts -r -u "$u" -- "$@")"
+
+if ! [ -f jsapi.cpp ]; then
+    echo "Run in \$SRC/js/src." >&2
+    exit 1
+fi
+
+build() {
+    if $reconfigure; then
+        eval "moz build-shell ${build_opts:-}"
+    else
+        pushd obj~
+        make -j8
+        popd
+    fi
+}
+
+pop() {
+    moz safe-pop
+    build
+
+    pushd .
+    VARIANT=no-patches eval "$@"
+    popd
+}
+
+push() {
+    if [ "$(hg qunapplied)" ]; then
+        hg qpush -a
+    fi
+    build
+
+    pushd .
+    VARIANT=all-patches eval "$@"
+    popd
+}
+
+set -eux
+
+if $push_first; then 
+    BASELINE=true push "$@"
+    pop "$@"
+else
+    BASELINE=true pop "$@"
+    push "$@"
+fi

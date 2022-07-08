@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -eux
+
+cd ~/mc/in
+moz safe-pop
+hg pull -u
+hg identify
+hg qselect morning
+if [ "$(hg qunapplied)" ]; then hg qpush -a; fi
+make -f client.mk
+mkid --prune 'obj-bug' --prune 'js/src/obj~'

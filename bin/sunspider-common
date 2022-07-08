@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# This file is meant to be sourced by other sunspider scripts in the same directory.
+# (We only include the #! line to tell Emacs this is a bash script.)
+
+set -eu
+
+SSDIR=$HOME/sunspider/sunspider
+SS=$SSDIR/sunspider
+COMPARE=$SSDIR/sunspider-compare-results
+ANALYZE=$SSDIR/resources/sunspider-analyze-results.js
+
+RESULTS=$SSDIR/sunspider-0.9.1-results
+PREFIX=$RESULTS/sunspider-test-prefix.js
+
+find_jsshell() {
+    jsshell=$PWD/obj~/js/src/js
+    if [ ! -x "$jsshell" ]; then
+        echo "Couldn't find shell '$jsshell'; run in js/src." >&2
+        exit 1
+    fi
+    jsshell=$(cd $(dirname $jsshell); pwd)/$(basename $jsshell)
+}
+
+results_file() {
+    local address="$1"
+    ls -t $RESULTS/sunspider-results-* | sed -ne "${address}{p;q}"
+}

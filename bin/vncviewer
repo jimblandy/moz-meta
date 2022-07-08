@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+vncviewer -passwd ~/.vnc/passwd -ViewOnly localhost:5

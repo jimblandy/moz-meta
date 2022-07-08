@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+set -eu
+
+comp_to_present() {
+    case $1 in
+        'continue') echo "continues" ;; 
+        'return') echo "returns" ;;
+        'throw') echo "throws" ;;
+        'terminate') echo "terminates" ;;
+    esac
+}
+
+gen() {
+    type=$1
+    comp=$2
+    res=$3
+
+    cat <<EOF
+// onPop fires when we leave a $type frame that $(comp_to_present $comp).
+
+var g = newGlobal('new-compartment');
+var dbg = new Debugger(g);
+EOF
+
+    case $type in
+        call)
+            cat <<EOF
+g.eval("function f() { debugger; return 'spleen'; }");
+EOF
+            ;;
+        terminate)
+            cat <<EOF
+g.eval("function f() { debugger; return 'spleen'; }");
+g.eval("function g() { debugger; return 'spleen'; }");
+EOF
+    fi
+}
+
+
+gen call return continue
+
+
+# for type in call construct eval global; do
+#     for comp in return throw terminate; do
+#         for res in continue return throw terminate; do

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+moz find "$@"                                   \
+    -name '*.[cChH]'                            \
+    -o -name '*.cc'                             \
+    -o -name '*.cp'                             \
+    -o -name '*.cpp'                            \
+    -o -name '*.CPP'                            \
+    -o -name '*.hxx'                            \
+    -o -name '*.js'                             \
+    -o -name '*.xul'                            \
+    -o -name '*.xml'

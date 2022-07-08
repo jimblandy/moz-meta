@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -eu
+u='Compare the symbol tables of two .o files.'
+eval "$(args $0 file1 file2 -u "$u" -- "$@")"
+
+readelf -sW $file1 > $file1.sym~
+readelf -sW $file2 > $file2.sym~
+diff -u $file1.sym~ $file2.sym~
+rm $file1.sym~ $file2.sym~

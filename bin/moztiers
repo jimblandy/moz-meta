@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+moz find . '(' -name build.mk -o -name toolkit-tiers.mk ')' "$@"

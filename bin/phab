@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -eu
+
+# Check for jimb-specific mistakes.
+(
+    cd $(find-top-src)/gfx/wgpu_bindings
+    if grep -q /home Cargo.toml moz.build; then
+        (
+            echo "You seem to still be using a local wgpu:"
+            set -x
+            cd "$PWD"
+            grep /home Cargo.toml moz.build
+            exit 1
+        )
+    fi
+)
+
+exec moz-phab "$@"

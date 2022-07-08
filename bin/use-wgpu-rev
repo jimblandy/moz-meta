@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if ! [ -f gfx/wgpu_bindings/Cargo.toml ]; then
+    echo "Run in Firefox top source directory." >&2
+    exit 1
+fi
+
+wgpu=/home/jimb/rust/wgpu
+if ! [ -d "$wgpu/wgpu/examples" ]; then
+    echo "wgpu source directory doesn't seem to be: $wgpu" >&2
+    exit 1
+fi
+
+repo=gfx-rs
+case "$1" in
+    "--jimb")
+        shift
+        repo=jimblandy
+        ;;
+esac
+
+rev=$1; shift
+expanded=$(cd $wgpu && git rev-parse --quiet "$rev") || {
+    echo "No revision '$rev' in $wgpu" >&2
+    exit 1
+}
+
+dependencies_rule() {
+    echo '
+        /^\[.*dependencies.'"$1"'\]/,/^$/ {
+            /^git *=/ {
+                igit = "https://github.com/'"$repo"'/wgpu"
+                d
+            }
+            /^rev *=/ {
+                irev = "'"$rev"'"
+                d
+            }
+            /^path *=/d 
+        }
+    '
+}
+
+moz_dot_yaml_rule='
+    /^origin:/,/^[^ 	]/ {
+        s/^ *release: .*$/  release: commit '"$rev"'/
+        s/^ *revision: .*$/  revision: '"$expanded"'/
+    }
+'
+
+sed gfx/wgpu_bindings/Cargo.toml                \
+    --in-place=~                                \
+    -e "$(dependencies_rule wgc)"               \
+    -e "$(dependencies_rule wgt)"               \
+    -e "$(dependencies_rule wgh)"
+
+sed gfx/wgpu_bindings/moz.yaml                  \
+    --in-place=~                                \
+    -e "${moz_dot_yaml_rule}"
+
+mach vendor rust --ignore-modified

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -eu
+
+cd ~/moz/unagi-backup
+adb pull /system system
+adb pull /data data

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+valgrind --smc-check=all --tool=lackey "$@" 2>&1 \
+| perl -ne 's/,//go; if (/guest instrs:\s+(\d+)/) { print "$1\n"; }'

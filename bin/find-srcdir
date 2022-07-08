@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if ! [ -f config.status ]; then
+    echo "find-srcdir: run in an object directory containing a config.status file." >&2
+    exit 1
+fi
+
+sed -n -e 's/ac_given_srcdir=//p' < config.status

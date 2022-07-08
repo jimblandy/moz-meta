@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -eu
+
+for b in "$@"; do
+    hg bookmark --delete "$b"
+done

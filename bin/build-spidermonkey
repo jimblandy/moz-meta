@@ -1,0 +1,18 @@
+# -*- mode:sh -*-
+
+set -eu
+: $js_src $js_obj $js_inst
+
+$scripts/clean-dir-if-empty-or-has $js_obj src
+$scripts/clean-dir-if-empty-or-has $js_inst bin
+
+mkdir $js_obj
+cd $js_obj
+cp -rl $js_src src
+# ln -s $js_src src
+
+mkdir obj
+cd obj
+../src/configure --prefix=$js_inst --with-nspr-config=$nspr_inst/bin/nspr-config
+make
+make install

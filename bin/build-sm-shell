@@ -1,0 +1,20 @@
+# -*- mode:sh -*-
+
+set -eux
+: $js_src $js_obj $js_inst
+
+js_shell=$top/shell-js
+js_config=$js_inst/bin/js-config
+
+$scripts/clean-dir-if-empty-or-has $js_shell jskeyword.tbl
+mkdir $js_shell
+
+(
+    cd $js_src
+    cp js.cpp jsshell.msg jskeyword.tbl $js_shell
+)
+    
+cd $js_shell
+g++ -DXP_UNIX $($js_config --cflags) -I. -c js.cpp
+g++ $($js_config --libs) js.o -o js
+LD_LIBRARY_PATH=$($js_config --libdir) ./js $js_src/Y.js

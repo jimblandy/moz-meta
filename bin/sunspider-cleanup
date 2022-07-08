@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -eu
+
+SSDIR=$HOME/sunspider/SunSpider
+
+moz keep-at-most 10 $SSDIR/tmp/sunspider-results-*.js
+
+if ! [ -f $(cat $SSDIR/tmp/baseline-filename.txt) ]; then
+    rm $SSDIR/tmp/baseline-filename.txt
+fi

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -eu
+
+JS=$PWD/obj~/shell/js
+
+cd $HOME/sunspider/SunSpider
+$JS "$@" \
+    -f tmp/sunspider-test-prefix.js \
+    -f resources/sunspider-standalone-driver.js
+      

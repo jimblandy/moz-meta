@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -eu
+
+MC=$HOME/mc
+JS1=$MC/tm/js/src/obj~/js
+JS2=$MC/wtm/js/src/obj~/js
+RUNS=200
+# ARGS="--tests=access-nsieve"
+ARGS="--args -j"
+sudo=''
+
+$sudo opcontrol --setup \
+                --no-vmlinux \
+                --image=$JS1,$JS2 \
+                --event=CPU_CLK_UNHALTED:50000:0:1:1
+$sudo opcontrol --reset
+$sudo opcontrol --start
+
+cd ~/sunspider/SunSpider
+./sunspider --shell=$JS1 --runs=$RUNS $ARGS --set-baseline
+./sunspider --shell=$JS2 --runs=$RUNS $ARGS
+$sudo opcontrol --shutdown
+
+# Trim out the vdso entries, for neater reports and smaller archives.
+find /var/lib/oprofile/samples -name '*anon*' -print0 | $sudo xargs -0 rm -r

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+if ! [ -f jsapi.h ]; then
+    echo "Run in js/src." >&2
+    exit 1
+fi
+topsrcdir=$(cd ../..; pwd)
+
+export MAKE=make MKDIR=mkdir TAR=tar
+
+export DIST=$PWD/package-js~
+export SRCDIR=$topsrcdir/js/src
+
+eval "$(
+    python $topsrcdir/python/mozbuild/mozbuild/milestone.py --topsrcdir=$topsrcdir \
+        | sed -rne "s/([0-9]+)\.([0-9]+)([a-z][0-9]+)?/major='\1' minor='\2' ab='\3'/p"
+    )"
+export MOZJS_MAJOR_VERSION=$major
+export MOZJS_MINOR_VERSION=$minor
+export MOZJS_ALPHA=$ab
+
+if [ -d "$DIST" ]; then
+    rm -rf "$DIST"
+fi
+
+sh make-source-package.sh clean
+sh make-source-package.sh build

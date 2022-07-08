@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+CBINDGEN=$HOME/.mozbuild/cbindgen/cbindgen
+
+if ! [ -d gfx ]; then
+    echo "Run in the top of the Firefox source tree." >&2
+    exit 1
+fi
+TOPSRCDIR=$PWD
+
+cd $(mozconfig-objdir)
+$CBINDGEN $TOPSRCDIR                                    \
+          --lockfile $TOPSRCDIR/Cargo.lock              \
+          --crate wgpu_bindings                         \
+          --metadata config/cbindgen-metadata.json      \
+          --cpp-compat                                  \
+          > gfx/wgpu_bindings/wgpu_ffi_generated.h

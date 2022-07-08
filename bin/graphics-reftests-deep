@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# A selected set of graphics and layout reftests, chosen to build deep
+# ClipManager::mCacheStacks.
+
+set -eu
+
+reftests='
+  gfx/tests/reftest
+  layout/reftests/details-summary
+  layout/reftests/display-list
+  layout/reftests/transform
+  layout/reftests/transform-3d
+'
+
+moz graphics-reftests "$@" $reftests

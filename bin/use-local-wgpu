@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if ! [ -f gfx/wgpu_bindings/Cargo.toml ]; then
+    echo "Run in Firefox top source directory." >&2
+    exit 1
+fi
+
+dependencies_rule() {
+    echo '
+        /^\[dependencies.'"$1"'\]/,/^\[/ {
+            /^git =/d
+            /^rev =/ {
+                ipath = "/home/jimb/rust/wgpu/wgpu-'"$2"'"
+                d
+            }
+        }
+        '
+}
+
+sed gfx/wgpu_bindings/Cargo.toml                \
+    --in-place=~                                \
+    -e "$(dependencies_rule wgc core)"          \
+    -e "$(dependencies_rule wgt types)"         \
+    -e "$(dependencies_rule wgh hal)"
+
+sed gfx/wgpu_bindings/moz.build                         \
+    --in-place=~                                        \
+    -e 's|/third_party/rust/|%/home/jimb/rust/wgpu/|'
+
+mach vendor rust --ignore-modified
+

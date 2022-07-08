@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if ! [ -d wgpu-core ]; then
+    echo "Run in wgpu top source directory." >&2
+    exit 1
+fi
+
+naga=/home/jimb/rust/naga
+if ! [ -f "$naga/tests/snapshots.rs" ]; then
+    echo "naga source directory doesn't seem to be: $naga" >&2
+    exit 1
+fi
+
+repo=gfx-rs
+case "$1" in
+    "--jimb")
+        shift
+        repo=jimblandy
+        ;;
+esac
+
+rev=$1; shift
+expanded=$(cd $naga && git rev-parse --quiet "$rev") || {
+    echo "No revision '$rev' in $naga" >&2
+    exit 1
+}
+
+dependencies_rule='
+    /^\[.*dependencies.naga\]/,/^$/ {
+        /^git *=/ {
+            igit = "https://github.com/'"$repo"'/naga"
+            d
+        }
+        /^rev *=/ {
+            irev = "'"$rev"'"
+            d
+        }
+        /^path *=/d 
+    }
+'
+
+change_dep() {
+    sed "$1/Cargo.toml"                         \
+        --in-place=~                            \
+        -e "$dependencies_rule"
+}
+
+change_dep wgpu
+change_dep wgpu-core
+change_dep wgpu-hal

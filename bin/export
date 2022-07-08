@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -eu
+
+u='Export the given changeset to a patch file in ~/moz named AS.patch.
+If --as is omitted, name the patch REV.patch. If you specify rev with a
+bookmark, this means the patch defaults to being named after the bookmark.'
+
+eval "$(args 'moz export' rev -k as -u "$u" -- "$@")"
+
+patch=$HOME/moz/patches/${as-${rev}}.patch
+hg export -r "$rev" -o "$patch"
+
+# Put the first non-comment line of the patch on the clipboard, for pasting
+# into Bugzilla as the patch description.
+sed < "$patch" -r -n                              \
+    -e '/diff/q'                                  \
+    -e '/^#|^[       ]*$/!{s/Bug [0-9]+: //;p;q}' \
+| xsel --input --clipboard

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if [ $# -lt 1 ]; then
+   echo "Usage: each-interp COMMAND ..." >&2
+   echo "Set MOZBIN_JITFLAGS to '', 'man', 'mjp' and run COMMAND ... ." >&2
+   exit 1
+fi
+
+(MOZBIN_JITFLAGS='' eval "$@")
+(MOZBIN_JITFLAGS='man' eval "$@")
+(MOZBIN_JITFLAGS='mjp' eval "$@")

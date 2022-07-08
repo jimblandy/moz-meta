@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if ! [ -f wgpu-core/Cargo.toml ]; then
+    echo "Run in wgpu workspace top source directory." >&2
+    exit 1
+fi
+
+rule='
+    /^\[.*dependencies.naga\]/,/^$/ {
+        /^git =/d
+        /^rev =/ {
+            ipath = "/home/jimb/rust/naga"
+            d
+        }
+    }
+'
+
+sed wgpu-core/Cargo.toml                        \
+    --in-place=~                                \
+    -Ee "$rule"
+
+sed wgpu-hal/Cargo.toml                         \
+    --in-place=~                                \
+    -Ee "$rule"
+
+sed wgpu/Cargo.toml                             \
+    --in-place=~                                \
+    -Ee "$rule"
+

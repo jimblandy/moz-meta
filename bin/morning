@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -eu
+
+exec > ~/moz/logs/$(date +%F)-morning 2>&1
+
+(
+    # This section should *not* be run with 'set -e' in force; these are
+    # independent tasks.
+    set +e -x
+    $mcbin/morning-in
+    $mcbin/morning-js tm     qpop update build clean-tests test-queue
+    $mcbin/morning-js dbg/tm qpop update build clean-tests test-queue
+)
+
+moz keep-at-most 5 ~/mc/logs/*-morning

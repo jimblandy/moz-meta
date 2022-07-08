@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -eux
+
+cargo fmt
+cargo clippy --workspace -- -D warnings
+WGPU_BACKEND=vulkan cargo test --workspace

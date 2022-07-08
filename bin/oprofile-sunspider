@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -eux
+
+sudo=':'
+sunspider=$HOME/sunspider/SunSpider
+
+top=$HOME/mc/tm
+
+JS=$top/js/src/obj~/shell/js
+
+$sudo opcontrol --setup \
+                --no-vmlinux \
+                --image=$JS
+$sudo opcontrol --reset
+$sudo opcontrol --start
+pushd $sunspider
+./sunspider --shell $JS --runs=0
+popd
+$sudo opcontrol --shutdown
+exit 0

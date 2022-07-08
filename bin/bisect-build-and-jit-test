@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+if ! [ -d obj~ ]; then
+    echo "Run in js/src." >&2
+    exit 127 # abort bisection
+fi
+
+if ! make -j4 -C obj~; then
+    exit 125 # skip revision
+fi
+
+python jit-test/jit_test.py "$@"

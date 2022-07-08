@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+set -eu
+
+u="Evaluate the shell command 'ARG ...' with none, then one, then two,
+..., then all Mercurial queue patches applied.
+The ARGs are combined into a single string, separated by spaces, and the
+resulting string is re-parsed as a shell command.
+The BASELINE environment variable is set to 'true' for the first run.
+With --reconfigure, delete, reconfigure and build from scratch using 'moz
+build-shell'.
+With --build-opts=OPTS, pass OPTS to 'moz build-shell'."
+
+eval "$(args "$0" -f reconfigure -k build-opts -r -u "$u" -- "$@")"
+
+if ! [ -f jsapi.cpp ]; then
+    echo "Run in \$SRC/js/src." >&2
+    exit 1
+fi
+
+build() {
+    if $reconfigure; then
+        eval "moz build-shell ${build_opts:-}"
+    else
+        pushd obj~
+        make -j8
+        popd
+    fi
+}
+
+set -eux
+
+moz safe-pop
+build
+pushd .
+VARIANT=no-patches eval "$*"
+popd
+
+export BASELINE=true
+for patch in $(hg qunapplied); do
+    hg qpush "$patch"
+    build
+    pushd .
+    VARIANT="${patch%.patch}" eval "$*"
+    popd
+    unset BASELINE
+done

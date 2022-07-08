@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+find . \( -name .hg -prune -false \) -o \
+       \( -name .git -prune -false \) -o \
+       \( -name 'obj*' -prune -false \) -o \
+       -name 'moz.build'

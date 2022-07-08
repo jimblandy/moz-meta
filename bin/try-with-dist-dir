@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if ! [ -f jsmath.cpp ]; then
+    echo 'wrong directory' >&2
+    exit 1
+fi
+
+autoconf2.13
+
+rm -rf obj-rel~ obj-abs~ rel~ abs~
+mkdir obj-rel~ obj-abs~ rel~ abs~
+(
+    cd obj-rel~
+    ../configure --with-dist-dir=../foo~/dist
+    make -j4
+)
+(
+    cd obj-abs~
+    ../configure --with-dist-dir=$(cd ../abs~; pwd)
+    make -j4
+)

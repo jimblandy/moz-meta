@@ -1,0 +1,34 @@
+#!/bin/sh
+
+set -eu
+
+u="--shell=SHELL says to use SHELL to run the tests; default is ./obj~/js/src/js.
+--js-args=ARGS passes ARGS through to the JS shell.
+--show-output and --show-cmd are passed through to jstests.py.
+Any arguments after '--' are passed through to jstests.py.
+Log files have names including the VARIANT environment variable value, if set."
+eval "$(args "$0" -f show-output show-cmd -k js-args shell='$PWD/obj~/js/src/js' -r -u "$u" -- "$@")"
+
+if ! [ -f jsapi.cpp ]; then
+    echo "Run in js/src." >&2
+    exit 1
+fi
+
+jstests_args=''
+if $show_output; then
+    jstests_args="$jstests_args --show-output"
+fi
+if $show_cmd; then
+    jstests_args="$jstests_args --show-cmd"
+fi
+
+cd tests
+
+set +e
+eval "python jstests.py '$shell' \
+             --worker-count=6 \
+             --failure-file='failures-$(date +%Y-%m-%d-%H:%M:%S)${VARIANT:+-$VARIANT}' \
+             ${js_args:+--args='$js_args'} \
+             ${jstests_args} \
+             \"\$@\""
+true

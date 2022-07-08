@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -eux
+
+cd ~/mc/191
+moz safe-pop
+hg pull -u
+hg qpush -a
+make -f client.mk

@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -eu
+
+while true; do
+    if [ "$PWD" = "$HOME" -o "$PWD" == '/' ]; then
+        echo "Couldn't find top of Mozilla source tree." >&2
+        exit 1
+    fi
+
+    if [ -f client.mk ]; then
+        echo $PWD
+        exit 0
+    fi
+
+    cd ..
+done

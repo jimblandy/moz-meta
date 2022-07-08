@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+set -eu
+
+moz=$HOME/moz
+
+cd $moz/mc
+hg pull unified
+
+# Doing the assignment on a separate line causes the '-e' flag to catch
+# errors reported by unused-ff (like, "No directories are available")
+d=$(moz unused-ff)
+cd $d
+hg pull unified
+
+if $(hg debugextensions | grep -q mq); then
+    if [ -n "$(hg qap)" ]; then
+        echo "MQ patches pushed in $PWD; won't update" >&2
+        exit 1
+    fi
+fi
+
+if [ "$(basename $PWD)" = "mc2" ]; then
+    hg pull
+fi
+
+hg checkout central
+
+# Clobber if needed.
+objdir=$(mozconfig-objdir)
+case "$objdir" in
+    *'/'* | *'..'*)
+        echo "Strange objdir: $objdir"
+        exit 1
+        ;;
+esac
+
+if [ -e "$objdir/CLOBBER" ]; then
+    if [ CLOBBER -nt "$objdir/CLOBBER" ]; then
+        echo "Clobbering $PWD/$objdir"
+        rm -rf "$objdir"
+    fi
+fi
+
+./mach build

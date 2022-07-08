@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if ! [ -f jsapi.cpp ]; then
+    echo "Run in \$SRC/js/src." >&2
+    exit 1
+fi
+
+JS=$PWD/obj~/js
+
+SSDIR=$HOME/sunspider/SunSpider
+SS=$SSDIR/sunspider
+SSRUNS=0
+SSARGS='--args=-j'
+
+# Run sunspider once to create a prefix file; bare-sunspider uses
+# whatever prefix file is lying around.
+pushd $SSDIR
+$SS --shell=$JS --runs=$SSRUNS $SSARGS
+popd
+
+set -x
+
+rm -rf obj~/gcov.pop obj~/gcov.push
+
+moz safe-pop
+find . -name '*.gcno' | xargs -r rm
+moz build-shell --gcov > /dev/null
+
+find . -name '*.gcda' | xargs -r rm
+moz bare-sunspider -j
+
+pushd obj~
+gcov *.o
+mkdir gcov.pop
+mv *.gcov gcov.pop
+popd
+
+hg qpush -a
+find . -name '*.gcno' | xargs -r rm
+mv obj~/gcov.pop .
+moz build-shell --gcov > /dev/null
+mv gcov.pop obj~
+
+find . -name '*.gcda' | xargs -r rm
+moz bare-sunspider -j
+
+pushd obj~
+gcov *.o
+mkdir gcov.push
+mv *.gcov gcov.push
+popd

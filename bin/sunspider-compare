@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+source $(dirname $0)/sunspider-common
+
+if [ $# != 2 ]; then
+    echo "usage: sunspider-compare N M" >&2
+    echo "where N and M are one-based, and count from newest to oldest results" >&2
+    echo "Note that N and M can actually be any 'sed' address, like /foo/; the" >&2
+    echo "stream being matched is a stream of filenames." >&2
+    exit 1
+fi
+
+first=$1; shift
+second=$1; shift
+
+find_jsshell
+
+cd $SSDIR
+exec $COMPARE --shell="$jsshell" $(results_file "${first}") $(results_file "${second}") "$@"

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -eu
+
+# Don't pull if we've got uncommitted changes.
+#
+# Certain files aren't interesting for the purpose of this check, but we don't
+# want to globally ignore them, because it's nice to have 'hg status' and 'hg
+# purge' help us keep the working directory clean.
+status=$(hg status -X 'glob:**/callgrind.out.*' \
+                   -X 'glob:**/core.*' \
+                   -X 'glob:**/failures-*' \
+                   -X 'glob:**/_psutil_*.{o,so}')
+if [ "$status" ]; then
+   echo "Should I worry about these files?" >&2
+   echo "$status" >&2
+   exit 1
+fi
+
+hg pull mozilla-unified
+hg checkout central

@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+if [ -f "jsapi.cpp" ]; then
+    dirs=". ../public ../../mfbt"
+else
+    dirs="."
+fi
+
+(
+    find ${dirs} \
+        -name '*~' -type d -prune \
+        -o -name 'obj-*' -prune \
+        -o \( -name '*.cpp' -o -name '*.c' -o -name '*.py' \) -print
+    find ${dirs} -name '*~' -type d -prune -o -name 'obj-*' -prune -o -name '*.h' -print
+) \
+| etags --regex='/.*JSD?_\(PUBLIC\|FRIEND\)_API(.*)[ \n\t]*\([a-zA-Z0-9_]+\)/\2/m' \
+        --regex='/.*\(struct\|class\).*JSD?_\(PUBLIC\|FRIEND\)_API(\(.*\))/\3/m' \
+        -

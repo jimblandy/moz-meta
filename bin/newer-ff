@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -eu
+
+shopt -s nullglob
+
+f=
+for n in $(echo ~/moz/{mc,mc2}/obj-rel/dist/bin/firefox); do
+    if [ -f "$n" ]; then
+        f="$f $n"
+    fi
+done
+
+if [ -n "$f" ]; then
+    ls -t $f | head -n 1
+    exit 0
+fi
+echo "No firefox executables found.">&2
+exit 1

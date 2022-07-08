@@ -1,0 +1,4 @@
+#!/bin/bash
+
+curl --silent --show-error --time-cond public-failures.txt \
+    -o public-failures.txt http://bclary.com/log/2009/03/15/public-failures.txt

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Rebuild xpcshell after a SpiderMonkey change.
+
+set -eu
+
+make -j8 -C obj-bug/js/src
+make -j8 -C obj-bug/js/src/xpconnect/src libs 
+#make -j8 -C obj-bug/toolkit/components/perf libs
+#make -j8 -C obj-bug/toolkit/components/ctypes libs
+#make -j8 -C obj-bug/toolkit/components/ctypes/tests
+#make -j8 -C obj-bug/layout/build libs
+make -j8 -C obj-bug/toolkit/library
+make -j8 -C obj-bug/js/src/xpconnect/shell

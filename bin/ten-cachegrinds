@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+rm -f ten-cachegrinds-[0-9]
+for i in {0..9}; do
+    moz cachegrind --log-file=ten-cachegrinds-$i "$@"
+done
+
+sed -n -e '/^.* I   refs:/!d
+s/^.* I   refs://
+s/[ ,]//g
+p' ten-cachegrinds-[0-9]

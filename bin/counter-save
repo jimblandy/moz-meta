@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -eu
+
+dest=$HOME/mc/$1
+if [ -d $dest ]; then
+   echo "Destination dir already exists: $dest" >&2
+   exit 1
+fi
+cp -rp $HOME/mc/counters $dest

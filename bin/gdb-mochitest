@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+if ! [ -d obj-bug ]; then
+   echo "Run at top of source tree, with an obj-bug subdirectory." >&2
+   exit 1
+fi
+
+# Run on the xvfb/vncserver display.
+export DISPLAY=:1
+if ! xdpyinfo > /dev/null 2>&1; then
+   echo "Couldn't connect to $DISPLAY; have you run 'moz vncserver' somewhere?" >&2
+   exit 1
+fi
+
+mach mochitest --debugger gdb --debugger-args ' --fullname --args' "$@"

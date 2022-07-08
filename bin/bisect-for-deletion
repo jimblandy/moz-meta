@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# hg bisection script for finding removal of a line of code
+
+sed < ~/moz/dbg/js/src/jscompartment.cpp \
+    -ne '/^[^ ].*pdateForDebugMode/,/^}/p' \
+| grep --quiet 'clearAnalysis'

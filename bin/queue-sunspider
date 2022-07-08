@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+echo "Figure out how to disable or detect CPU throttling!" >&2
+exit 1
+
+set -eu
+
+if ! [ -f jsapi.cpp ]; then
+    echo "Run in \$SRC/js/src." >&2
+    exit 1
+fi
+
+JS=$PWD/obj~/js
+
+SSDIR=$HOME/sunspider/SunSpider
+SS=$SSDIR/sunspider
+SSRUNS=200
+SSARGS='--args=-j'
+OPTIMIZE=--optimize
+
+set -x
+
+moz safe-pop
+moz build-shell $OPTIMIZE
+
+pushd $SSDIR
+sleep 90 # cool off CPU
+$SS --shell="$JS" --runs=$SSRUNS $SSARGS --set-baseline
+popd
+
+hg qpush -a
+moz build-shell $OPTIMIZE
+
+pushd $SSDIR
+sleep 90 # cool off CPU
+$SS --shell="$JS" --runs=$SSRUNS $SSARGS
+popd

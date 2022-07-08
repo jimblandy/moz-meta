@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+valgrind --smc-check=all-non-file \
+         --vex-iropt-register-updates=allregs-at-mem-access \
+         "$@"

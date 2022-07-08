@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+size_path_sorted() {
+    zipinfo -m "$1"             \
+    | sed -e '1,2d' -e '$d'     \
+    | cut -c 20-29,57-          \
+    | sort -k 2
+}
+
+exec diff -u <(size_path_sorted "$1") <(size_path_sorted "$2")

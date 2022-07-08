@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if ! [ -a "$1" ]; then
+    :
+elif ! [ -d "$1" ]; then
+    echo "not a directory: $1" >&2
+    exit 2
+elif rmdir "$1" 2>/dev/null; then
+    :
+elif [ "${2:+set}" ]; then
+    if [ -a "$1/$2" ]; then
+        rm -rf "$1"
+    else
+        echo "directory '$1' isn't empty but doesn't have expected contents '$2'" >&2
+        exit 2
+    fi
+else
+    echo "directory not empty: $1" >&2
+    exit 2
+fi

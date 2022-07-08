@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -eu
+if [ "$(hg status -mard)" != "" ]; then
+    hg qnew -f safe-pop-$(date +%Y%m%d).patch
+fi
+hg qpop -a

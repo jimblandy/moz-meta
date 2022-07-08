@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+set -eu
+
+makefile=$1; shift
+header=$1; shift
+if [ -d $makefile ]; then
+    makefile="$makefile/Makefile"
+fi
+if [ ! -f "$makefile" -o ! -f "$header" ]; then
+    echo "Usage: $0 MAKEFILE-OR-DIR HEADER [FLAGS]" >&2
+    exit 1
+fi
+
+mimk="$(dirname $0)/map-includes.mk"
+
+get_make_variable() {
+    local makefile=$1
+    local var=$2
+    make -f $(basename $makefile) -f $mimk "map-includes-print-$var"
+}
+
+cd $(dirname $makefile)
+
+g++ -E -dI -include "$header" -x c++ /dev/null $(get_make_variable $makefile COMPILE_CXXFLAGS) \
+| (
+    while read line; do
+grep '^[:space:]*#[:space:]*include'
+    done
+)
+

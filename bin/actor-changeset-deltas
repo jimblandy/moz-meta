@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+
+import subprocess
+import sys
+
+def count_changes(changeset):
+    diff = subprocess.check_output(['hg', 'diff', '-c', changeset])
+    delta = 0
+    for line in diff.decode('latin-1').splitlines():
+        line = line.strip()
+        if line.find('ActorClass(') != -1:
+            if line.startswith('-'):
+                delta -= 1
+            elif line.startswith('+'):
+                delta += 1
+    return delta
+
+for line in open('../actor-changesets'):
+    [changeset, author] = line.strip().split(':', 1)
+    delta = count_changes(changeset)
+    print(':'.join([changeset, str(delta), author]))

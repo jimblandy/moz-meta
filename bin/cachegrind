@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+valgrind --tool=cachegrind --smc-check=all-non-file "$@"

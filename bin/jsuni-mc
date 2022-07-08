@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -eux
+
+scripts=$(cd $(dirname $0); pwd)
+
+top=/home/jimb/mc
+src_top=$top
+build_top=$top
+inst_top=$top
+
+jsuni_src=$src_top/jsuni
+
+nspr_inst=$inst_top/inst-nspr2
+
+js_src=$jsuni_src/js/src
+js_obj=$build_top/obj-js
+js_inst=$inst_top/inst-js
+
+(
+    cd $js_src
+    autoconf-2.13
+)
+
+. $scripts/build-spidermonkey
+. $scripts/build-sm-shell

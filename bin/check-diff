@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+hg qpush -a
+hg diff -r qparent:qtip > q~
+diff -u check-diff-base.patch~ q~

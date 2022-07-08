@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if [ ! -f jsapi.cpp ]; then
+   echo "Can't find jsapi.cpp in current directory.  Run in js/src." >&2
+   exit 1
+fi
+
+if [ $# -ge 1 ]; then
+    case "$1" in
+        "--clean" )
+            find obj~ \( -name '*.gcno' -o -name '*.gcda' -o -name '*.gcov' \) -delete
+            exit 0
+            ;;
+        "--reset" )
+            find obj~ \( -name '*.gcda' -o -name '*.gcov' \) -delete
+            exit 0
+            ;;
+        * )
+            echo "$0: unrecognized option '$1'" >&2
+            exit 1
+            ;;
+    esac
+fi
+
+cd obj~
+
+if [ ! -f jsapi.gcno ]; then
+   echo "Can't find obj~/jsapi.gcno.  Build with --coverage." >&2
+   exit 1
+fi
+
+# Create a temporary makefile that includes the real makefile, and adds a
+# rule that prints each source file, after all variable substitution and
+# VPATH searching is done.
+tmpmk=gcov-temp.mk
+trap "rm -f '$tmpmk'" 0 1 2 15
+
+cat > $tmpmk <<EOF
+include Makefile
+gcov-list-sources: \$(CPPSRCS)
+	@for f in \$^; do echo \$\$f; done
+EOF
+
+sources="$(make -f $tmpmk gcov-list-sources)"
+
+# Remove any source files from the list that don't have a graph file.
+# Leaving them in causes gcov to output files with zero counts everywhere.
+filtered=""
+for s in $sources; do
+    g=$(basename "$s")
+    g=${g%.cc}
+    g=${g%.cpp}
+    if [ -f $g.gcda ]; then
+        filtered="$filtered $s"
+    fi
+done
+
+rm -f *.gcov
+
+gcov --branch-probabilities $filtered > gcov.log~
+echo "(gcov output in $(pwd)/gcov.log~)"

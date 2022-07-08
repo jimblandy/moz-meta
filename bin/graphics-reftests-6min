@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# A selected set of graphics and layout reftests, chosen to take about six
+# minutes to run.
+
+set -eu
+
+reftests='
+    gfx/tests/reftest
+    layout/reftests/async-scrolling
+    layout/reftests/backgrounds
+    layout/reftests/bidi/dirAuto
+    layout/reftests/bidi/numeral
+    layout/reftests/bidi
+    layout/reftests/bugs
+    layout/reftests/css-blending
+    layout/reftests/css-gradients
+    layout/reftests/css-grid
+    layout/reftests/css-scroll-snap
+    layout/reftests/css-scrollbars
+    layout/reftests/details-summary
+    layout/reftests/display-list
+    layout/reftests/flexbox
+    layout/reftests/floats
+    layout/reftests/invalidation
+    layout/reftests/margin-collapsing
+    layout/reftests/pixel-rounding
+    layout/reftests/reftest-sanity
+    layout/reftests/scrolling
+    layout/reftests/table-anonymous-boxes
+    layout/reftests/table-bordercollapse
+    layout/reftests/text-decoration
+    layout/reftests/text
+    layout/reftests/transform-3d
+    layout/reftests/transform
+'
+
+moz graphics-reftests "$@" $reftests

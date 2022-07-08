@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+rename() {
+    sed -e '/RootedObject/StackRootedObject;
+RootedFunction;
+RootedScript;
+RootedString;
+RootedId;
+RootedValue;
+
+}

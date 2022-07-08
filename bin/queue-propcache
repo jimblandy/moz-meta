@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+set -eux
+
+if ! [ -f jsapi.cpp ]; then
+    echo "Run in \$SRC/js/src." >&2
+    exit 1
+fi
+
+JS=$PWD/obj~/js
+
+SSDIR=$HOME/sunspider/SunSpider
+SS=$SSDIR/sunspider
+
+# Run sunspider once to get a reasonable prefix file.
+pushd $SSDIR
+$SS --shell=$JS --runs=0 --args=-j
+popd
+
+moz safe-pop
+moz build-shell > /dev/null
+
+rm -f /tmp/propcache.stats
+moz bare-sunspider -j
+cp /tmp/propcache.stats propcache.stats.popped
+
+hg qpush -a
+moz build-shell > /dev/null
+
+rm -f /tmp/propcache.stats
+moz bare-sunspider -j
+cp /tmp/propcache.stats propcache.stats.pushed

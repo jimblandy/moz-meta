@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+srctop=$(moz findsrctop)
+obj=$(find $srctop -maxdepth 1 -name 'obj-*' -type d -print -quit)
+if ! [ -d "$obj" ]; then
+    echo "Couldn't find build directory.">&2
+    exit 1
+fi
+echo "$obj"

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+mkid $(find . -name '*bundle.js' -printf '-p %P\n')

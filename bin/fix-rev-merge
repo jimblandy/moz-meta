@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+log=$HOME/mc/tamarin-tracing/l~
+
+base=$1
+csid=$2
+
+msg="$(
+  sed -n < $log \
+      -e "/^changeset:   .*:$csid$/,/^changeset:/p" \
+  | sed -e '/^files:/d' -e "s/^/> /" \
+  | head --lines -3
+)"
+
+if ! [ "$msg" ]; then
+    echo "Can't find log message for '$csid' in $log" >&2
+    exit 1
+fi
+
+author=$(
+  echo "$msg" \
+  | sed --regexp-extended -n -e "s/^.*[^a-z]([^@]*)@.*$/\1/p"
+)
+
+o_rev=tt-mmgc-$base-rev.patch
+o_merge=tt-mmgc-$base-merge.patch
+
+n_rev=tt-mmgc-$author-$csid-rev.patch
+n_merge=tt-mmgc-$author-$csid-merge.patch
+
+if ! [ -f $o_rev ] || ! [ -f $o_merge ]; then
+    echo "rev and/or merge patch missing: $o_rev, $o_merge" >&2
+    exit 1
+fi
+
+fix_patch() {
+    local opatch=$1
+    local npatch=$2
+    local head=$3
+
+    (
+        echo "$head"
+        echo "$msg"
+        echo ""
+        sed < $opatch -n -e '/^diff/,$p'
+    ) > $npatch
+}
+
+fix_patch $o_rev $n_rev 'Revert changeset in space/MMgc before upgrading MMgc; will re-merge later.'
+fix_patch $o_merge $n_merge 'Merge changeset in space/MMgc after upgrading MMgc.'
+
+sed -i~ series -e "s/$o_rev/$n_rev/" -e "s/$o_merge/$n_merge/"

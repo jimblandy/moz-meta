@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+set -eux
+
+scripts=$(cd $(dirname $0); pwd)
+
+top=$(pwd)
+src_top=$top
+build_top=$top
+inst_top=$top
+
+rev=fc50368ce584
+repo=$HOME/mc/jsuni
+jsuni_src=$src_top/jsuni
+. $scripts/jsuni-checkout
+
+nspr_src=$jsuni_src/nsprpub
+nspr_obj=$build_top/obj-nspr
+nspr_inst=$inst_top/inst-nspr
+. $scripts/build-nspr
+
+js_src=$jsuni_src/js
+js_obj=$build_top/obj-js
+js_inst=$inst_top/inst-js
+. $scripts/build-spidermonkey

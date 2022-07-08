@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if [ -f jsapi.cpp ]; then
+    # Skip build directories
+    skipdirs="$(find -L . -maxdepth 1 -type d \( -name 'obj-*' -o -name 'obj~' \) -printf '-p %p ')"
+    mkid -m ~/.id-lang.map . ../public ../../mfbt ../../memory $skipdirs
+elif [ -d docshell ]; then
+    # Skip any full-tree build directories.
+    skipobjdirs="$(find . -maxdepth 1 -type d -name 'obj-*' -printf '-p %p ')"
+
+    # Skip JS build directories.
+    skipjsdirs="$(find -L js/src -maxdepth 1 -type d -name 'obj-*' -printf '-p %p ')"
+
+    # Skip some Rust target directories.
+    skiptargetdirs=
+    for dir in target gfx/wr/target; do
+        if [ -d $dir ]; then
+            skiptargetdirs="$skiptargetdirs -p $dir"
+        fi
+    done
+
+    skipvcdirs=
+    if [ -d .git ]; then
+        skipvcdirs="$skipvcdirs -p .git"
+    fi
+    if [ -d .hg ]; then
+        skipvcdirs="$skipvcdirs -p .hg"
+    fi
+
+    allskips="$skipvcdirs $skipobjdirs $skipjsdirs $skiptargetdirs"
+
+    mkid -x text -m ~/.id-lang.map \
+         $allskips \
+         -p testing/talos/talos/tests/tp5n \
+         -p intl
+
+    if build=$(find-build); then
+        # Build a separate ID file in the build directory, for generated C++.
+        (
+            cd "$build"
+            mkid -x text -m ~/.id-lang.map
+        )
+    fi
+else
+    echo 'Run in js/src, or at top level.' >&2
+    exit 1
+fi

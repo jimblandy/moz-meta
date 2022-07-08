@@ -1,0 +1,57 @@
+#!/bin/sh
+
+set -eu
+
+u="--shell=SHELL says to use SHELL to run the tests; default is ./obj~/js/src/js.
+--show-output, --show-cmd, and --tbpl are passed through to jstests.py.
+--show passes them both through.
+--bptests runs those tests that set breakpoints.
+Any arguments after '--' are passed through to jit_test.py.
+Log files have names containing the VARIANT environment variable value, if set."
+eval "$(args "$0" -f show show-output show-cmd tbpl no-slow bptests -k shell='$PWD/obj~/js/src/js' -r -u "$u" -- "$@")"
+
+if ! [ -f jsapi.cpp ]; then
+    echo "Run in js/src." >&2
+    exit 1
+fi
+
+jit_tests_dir=$command_prefix/jit-tests
+
+failure_file="$jit_tests_dir/failures-$(date +%Y-%m-%d-%H:%M:%S)${VARIANT:+-$VARIANT}"
+echo "Logging errors to: $failure_file" >&2
+mkdir -p "$jit_tests_dir"
+
+# Don't let old error logs accumulate without bound.
+find "$jit_tests_dir" -type f -mtime +7 -delete
+
+jittests_args=''
+if $show; then
+    jittests_args="$jittests_args --show-output --show-cmd"
+else
+    if $show_output; then
+        jittests_args="$jittests_args --show-output"
+    fi
+    if $show_cmd; then
+        jittests_args="$jittests_args --show-cmd"
+    fi
+    if $tbpl; then
+        jittests_args="$jittests_args --tbpl"
+    fi
+fi
+
+if $no_slow; then
+    jittests_args="$jittests_args --no-slow"
+fi
+
+if $bptests; then
+    moz update-bptests
+    jittests_args="$jittests_args --read-tests=$HOME/moz/bptests"
+fi
+
+set +e
+eval "python jit-test/jit_test.py '$shell' \
+             --write-failures='$failure_file' \
+             ${jittests_args} \
+             \"\$@\""
+
+rm -f ~/moz/bptests

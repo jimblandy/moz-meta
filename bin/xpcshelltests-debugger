@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -eu
+
+cd $(moz findsrctop)
+make -C $PWD/obj-bug/toolkit/devtools/debugger/tests libs
+./mach xpcshell-test "$@"
+
+

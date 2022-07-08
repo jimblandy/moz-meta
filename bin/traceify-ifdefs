@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -eu
+scriptdir=$(dirname $0)
+
+$scriptdir/makefiles \
+| xargs sed --regexp-extended --in-place=.traceify~ \
+    -e '
+1i\
+call_shape=$$(call trace_var,$1)\
+traced_defp=$(subst $(call_shape),,$(value $1))
+s/^[[:space:]]ifdef[[:space:]]+([-a-zA-Z0-9_]+)[[:space:]]*(#.*)?$/ifneq (,$(call traced_defp,\1))/
+s/^[[:space:]]ifndef[[:space:]]+([-a-zA-Z0-9_]+)[[:space:]]*(#.*)?$/ifeq (,$(call traced_defp,\1))/
+'

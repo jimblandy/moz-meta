@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+set -eux
+
+# if ! [ -f config.status ]; then
+#     echo 'Run in build directory.' >&2
+#     exit 1
+# fi
+
+# if ! moz build-shell --optimize > /dev/null; then
+if ! make --silent -j4 -C obj~; then
+    set -x
+    hg bisect --skip
+    exit 0
+fi
+
+# cd ..
+if ./bisect-test.sh; then
+    set -x
+    hg bisect --good
+else
+    set -x
+    hg bisect --bad
+fi

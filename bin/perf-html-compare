@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+set -eu
+
+u="Compare two perf-html.io profiles.
+LEFT and RIGHT are two profile .zip files.
+OUTPUT is the name of the profile .zip file to write the comparison to.
+MARKER is the name of a profile marker, like 'custom.jsdebugger.stepOut.DAMP';
+the comparison region is narrowed to the first occurrence of this marker in each
+profile.
+The 'GeckoMain' threads from each profile are presented in the comparison as if
+they were two threads running in parallel within a single profile."
+eval $(args "$0" left right output marker -k objdir -u "$u" -- "$@")
+
+if [ "${objdir+set}" != set ]; then
+    srctop=$(moz findsrctop) || {
+        echo "If needed, pass the --objdir flag." >&1
+        exit 1
+    }
+    objdir=$(cd "$srctop"; mozconfig-objdir)
+fi
+
+if [ -d "objdir" ]; then
+    echo "object directory doesn't exist: $objdir" >&1
+    exit 1
+fi
+
+run_mozilla="$objdir/dist/bin/run-mozilla.sh"
+if [ ! -x "$run_mozilla" ]; then
+    echo "Can't find 'run-mozilla.sh' script: expected $run_mozilla" >&1
+    exit 1
+fi
+
+xpcshell="$objdir/dist/bin/xpcshell"
+if [ ! -x "$xpcshell" ]; then
+    echo "Can't find 'xpcshell' executable: expected $xpcshell" >&1
+    exit 1
+fi
+
+xpcshell_script="$(dirname "$0")/../subr/perf-html-compare.xpcshell"
+if [ ! -f "$xpcshell_script" ]; then
+    echo "Can't find xpcshell comparison script: expected $xpcshell_script" >&1
+    exit 1
+fi
+
+trap 'rm -r perf-html-compare-left perf-html-compare-right perf-html-compare-output' EXIT
+unzip "$left" -d perf-html-compare-left
+unzip "$right" -d perf-html-compare-right
+
+mkdir -p "perf-html-compare-output/profile_damp/page_0_pagecycle_1"
+
+"$run_mozilla" "$xpcshell" "$xpcshell_script" \
+               "$marker" \
+               perf-html-compare-left/profile_damp/page_0_pagecycle_1/cycle_0.profile \
+               perf-html-compare-right/profile_damp/page_0_pagecycle_1/cycle_0.profile \
+               "perf-html-compare-output/profile_damp/page_0_pagecycle_1/comparison.profile"
+
+zip -r "$output" perf-html-compare-output/profile_damp

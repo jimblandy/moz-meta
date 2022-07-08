@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -eu
+if [ "$(hg status -mad)" != "" ]; then
+    hg qnew -f saved-changes-$(date +%Y%m%d).patch
+fi

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+script_dir=$(dirname $0)
+
+echo "Use a DISPLAY of :5 to connect to the VNC server."
+exec vncserver :5 -fg -name mozilla-tests -xstartup ${script_dir}/xstartup.vncserver "$@"

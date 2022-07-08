@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+merge=$1
+
+user="$(
+  echo $merge \
+  | sed -r -n 's/^tt-mmgc-([^-]*)-[0-9a-f]*-merge.patch$/\1/p'
+)"
+csid="$(
+  echo $merge \
+  | sed -r -n 's/^tt-mmgc-[^-]*-([0-9a-f]*)-merge.patch$/\1/p'
+)"
+
+r=tt-mmgc-$user-$csid-rev.patch
+m=tt-mmgc-$user-$csid-merge.patch
+
+if ! [ -f $r ]; then
+    echo "Reconstructed revert name was wrong: $r" >&2
+    exit 1
+fi
+if ! [ -f $m ]; then
+    echo "Reconstructed merge name was wrong: $m" >&2
+    exit 1
+fi
+
+cp $r tt-mmgc-a-rev.patch
+cp $m tt-mmgc-a-merge.patch
+
+$(dirname $0)/fix-rev-merge a $csid

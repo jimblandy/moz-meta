@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+MC=$HOME/mc
+JS=$MC/tm/js/src/obj~/js/src/js
+
+SSDIR=$HOME/sunspider/SunSpider
+SS=$SSDIR/sunspider
+
+cd $SSDIR
+$SS --shell="$JS" \
+    --runs=0 \
+    --tests=tagcloud \
+    --args="-e 'tracing(\"/tmp/ss.trace~\")'"

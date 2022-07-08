@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+ARCHER_BIN=$HOME/gdb/bin
+MOZ=$HOME/moz
+ARCHER_MOZILLA=$MOZ/archer-mozilla
+
+srcdir=$PWD
+cd obj~
+objdir=$PWD
+
+python "$ARCHER_MOZILLA/mozilla/run-tests.py" "$ARCHER_BIN/gdb" $srcdir $objdir

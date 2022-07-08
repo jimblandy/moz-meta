@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+src=$PWD
+srcTestDir=$src/testing/xpcshell
+obj=$src/obj-bug
+objTestDir=$obj/_tests/xpcshell/toolkit/devtools/debugger/tests/unit
+testPath=$objTestDir/$1
+xpcshell=$obj/dist/bin/xpcshell
+
+if ! [ -f $srcTestDir/head.js ]; then
+    echo "Can't find a head.js: $srcTestDir/head.js" >&2
+    echo "Run at the top of a source tree that has an obj-bug subdirectory with a build." >&2
+    exit 1
+fi
+if ! [ -d $obj ]; then
+    echo "Run at the top of a source tree that has an obj-bug subdirectory with a build." >&2
+    exit 1
+fi
+if ! [ -f "$testPath" ]; then
+    echo "No such test file: $testPath" >&2
+    exit 1
+fi
+if ! [ -x $xpcshell ]; then
+    echo "No xpcshell executable found: $xpcshell" >&2
+    exit 1
+fi
+
+# These values are taken from the TEST-INFO lines printed by runxpcshelltests.py.
+# You probably want to refresh them from time to time.
+export LD_LIBRARY_PATH=$obj/dist/bin:/usr/local/lib
+export XPCOM_DEBUG_BREAK=stack-and-abort
+export XPCSHELL_TEST_PROFILE_DIR=/tmp/xpcshell/xpcshellprofile
+export NS_TRACE_MALLOC_DISABLE_STACKS=1
+export XPCOM_MEM_LEAK_LOG=/tmp/xpcshell/xpcshellprofile/runxpcshelltests_leaks.log
+export MOZ_CRASHREPORTER_NO_REPORT=1
+
+cd $objTestDir
+
+$xpcshell                                                               \
+-g $obj/dist/bin                                                        \
+-a $obj/dist/bin                                                        \
+-r $obj/dist/bin/components/httpd.manifest                              \
+-m -n -s                                                                \
+-e "const _HEAD_JS_PATH = '$srcTestDir/head.js';"                       \
+-f "$srcTestDir/head.js"                                                \
+-e "const _HEAD_FILES = ['$objTestDir/head_dbg.js'];"                   \
+-e "const _TAIL_FILES = [];"                                            \
+-e "const _TEST_FILE = ['$testPath'];"                                  \
+-e "_execute_test(); quit(0);"

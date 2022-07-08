@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+source $(dirname $0)/sunspider-common
+
+u="Re-print sunspider results for the N'th youngest run (by default, the most recent).
+N can also be a regular expression in /slashes/, matched against results filenames."
+eval "$(args "$0" -o n=1 -u "$u" -- "$@")"
+
+find_jsshell
+
+cd $SSDIR
+exec $jsshell -f "$PREFIX" -f "$(results_file "$n")" -f "$ANALYZE"
