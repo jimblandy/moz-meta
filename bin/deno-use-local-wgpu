@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if ! [ -f runtime/Cargo.toml ]; then
+    echo "Run in deno workspace top source directory." >&2
+    exit 1
+fi
+
+rule='
+    s|^deno_webgpu *=.*$|deno_webgpu = { path = "/home/jimb/rust/wgpu/deno_webgpu" }|
+'
+
+sed runtime/Cargo.toml                          \
+    --in-place=~                                \
+    -e "$rule"
+
+sed cli/Cargo.toml                              \
+    --in-place=~                                \
+    -e "$rule"
+
