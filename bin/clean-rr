@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+set -eu
+cd "$HOME/.local/share"
+rm -rf rr
