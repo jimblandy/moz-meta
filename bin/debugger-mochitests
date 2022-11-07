@@ -3,7 +3,7 @@
 set -veu
 
 # I never want to run the mochitests on my real display.
-export DISPLAY=:1
+export DISPLAY=:2
 
 # Get an error up front if we're not running vncserver.
 xdpyinfo > /dev/null

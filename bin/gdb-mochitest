@@ -6,7 +6,7 @@ if ! [ -d obj-bug ]; then
 fi
 
 # Run on the xvfb/vncserver display.
-export DISPLAY=:1
+export DISPLAY=:2
 if ! xdpyinfo > /dev/null 2>&1; then
    echo "Couldn't connect to $DISPLAY; have you run 'moz vncserver' somewhere?" >&2
    exit 1
