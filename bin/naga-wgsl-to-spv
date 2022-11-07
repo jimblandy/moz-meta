@@ -11,4 +11,4 @@ naga --index-bounds-check-policy ReadZeroSkipWrite \
      $base.wgsl $base.txt $base.spv "$@"
 spirv-dis $base.spv -o $base.spvasm
 spirv-val --target-env vulkan1.0 $base.spv && echo "spirv-val: Validation okay"
-cat $base.txt
+cat $base.spvasm
