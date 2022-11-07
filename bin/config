@@ -6,13 +6,13 @@ meta=/home/jimb/moz/meta
 cd $(moz findsrctop)
 
 if [ -z "${1:+set}" ]; then
-    target=$(readlink .mozconfig)
+    target=$(readlink mozconfig)
     case "$target" in
         $meta/mozconfigs/*)
             basename "$target"
             ;;
         *)
-            echo "Unrecognized .mozconfig link contents: $target" >&2
+            echo "Unrecognized mozconfig link contents: $target" >&2
             exit 1
             ;;
     esac
@@ -25,5 +25,10 @@ if ! [ -f "$config" ]; then
     exit 1
 fi
 
-rm -f .mozconfig
-ln -s $config .mozconfig
+rm -f mozconfig
+ln -s $config mozconfig
+
+build=$(mozconfig-objdir)
+rm -f compile_commands.json
+ln -s -f $build/compile_commands.json compile_commands.json
+

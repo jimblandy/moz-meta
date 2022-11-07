@@ -17,12 +17,12 @@ ac_add_options () {
 }
 
 topsrcdir=$PWD
-. .mozconfig
+. mozconfig
 
 if [ -x build/autoconf/config.guess ]; then
     echo "obj-$(build/autoconf/config.guess)"
     exit 0
 fi
 
-echo "Couldn't find MOZ_OBJDIR setting in $PWD/.mozconfig" >&2
+echo "Couldn't find MOZ_OBJDIR setting in $PWD/mozconfig" >&2
 exit 1
