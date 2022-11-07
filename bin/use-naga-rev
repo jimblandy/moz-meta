@@ -29,15 +29,14 @@ expanded=$(cd $naga && git rev-parse --quiet "$rev") || {
 
 dependencies_rule='
     /^\[.*dependencies.naga\]/,/^$/ {
-        /^git *=/ {
-            igit = "https://github.com/'"$repo"'/naga"
-            d
+        /^\[.*dependencies/ {
+            agit = "https://github.com/'"$repo"'/naga"
+            arev = "'"$rev"'"
         }
-        /^rev *=/ {
-            irev = "'"$rev"'"
-            d
-        }
-        /^path *=/d 
+        /^path =/d
+        /^git =/d
+        /^version =/d
+        /^rev =/d
     }
 '
 

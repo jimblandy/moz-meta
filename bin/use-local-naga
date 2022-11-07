@@ -9,11 +9,13 @@ fi
 
 rule='
     /^\[.*dependencies.naga\]/,/^$/ {
-        /^git =/d
-        /^rev =/ {
-            ipath = "/home/jimb/rust/naga"
-            d
+        /^\[.*dependencies/ {
+            apath = "/home/jimb/rust/naga"
         }
+        /^path =/d
+        /^git =/d
+        /^version =/d
+        /^rev =/d
     }
 '
 
