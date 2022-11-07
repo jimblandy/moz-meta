@@ -1,13 +1,9 @@
-# The exact text received from Jason Kratzer on Matrix.
+# jkratzer-asan without fuzzing.
 
-mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/../objdir-ff-asan-fuzzing
-
-# Adjust this to the number of CPU cores + 2
-mk_add_options MOZ_MAKE_FLAGS=-j10
+mk_add_options MOZ_OBJDIR=obj-ff-asan-ubsan
 
 ac_add_options --enable-address-sanitizer
 ac_add_options --enable-undefined-sanitizer
-ac_add_options --enable-fuzzing
 
 export ASAN_OPTIONS="detect_leaks=0"
 # export RUSTFLAGS="$RUSTFLAGS -Zsanitizer=address"

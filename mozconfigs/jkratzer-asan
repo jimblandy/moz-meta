@@ -1,3 +1,6 @@
+# Only minor modifications of jkratzer-asan-original:
+# Just MOZ_OBJDIR and letting 'mach build' its own -j flag.
+
 mk_add_options MOZ_OBJDIR=obj-ff-asan-fuzzing
 
 ac_add_options --enable-address-sanitizer
