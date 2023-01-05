@@ -9,7 +9,7 @@ fi
 
 dependencies_rule() {
     echo '
-        /^\[dependencies.'"$1"'\]/,/^\[/ {
+        /^\[(target\..*\.)?dependencies.'"$1"'\]/,/^$/ {
             /^git =/d
             /^rev =/ {
                 ipath = "/home/jimb/rust/wgpu/wgpu-'"$2"'"
@@ -20,6 +20,7 @@ dependencies_rule() {
 }
 
 sed gfx/wgpu_bindings/Cargo.toml                \
+    --regexp-extended                           \
     --in-place=~                                \
     -e "$(dependencies_rule wgc core)"          \
     -e "$(dependencies_rule wgt types)"         \

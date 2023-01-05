@@ -38,6 +38,17 @@ dependencies_rule() {
                 irev = "'"$rev"'"
                 d
             }
+            /^path *=/d
+        }
+        /^\[target\..*\.dependencies.'"$1"'\]/,/^$/ {
+            /^git *=/ {
+                igit = "https://github.com/'"$repo"'/wgpu"
+                d
+            }
+            /^rev *=/ {
+                irev = "'"$rev"'"
+                d
+            }
             /^path *=/d 
         }
     '
