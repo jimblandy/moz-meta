@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# For a series of commits to `ash`, check that the generated files
+# really correspond to what the generator produces.
+
+set -eu
+
+if ! [ -d generator ]; then
+    echo "Run in top of `ash` workspace" >&1
+    exit 1
+fi
+
+git config advice.detachedHead false
+for commit in "$@"; do
+    git checkout $commit
+    git submodule update --init --recursive
+    cargo run -p generator
+    cargo fmt -p ash
+    git diff --exit-code
+done
