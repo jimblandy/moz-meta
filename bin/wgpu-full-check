@@ -11,6 +11,9 @@ WGPU_BACKEND=vulkan                             \
     --workspace                                 \
     --exclude cts_runner
 
+# "When RUSTFLAGS is changed between invocations, this can trigger a complete rebuild."
+# https://github.com/rust-lang/cargo/issues/8716
+# Using a separate target directory avoids affecting other builds.
 CARGO_TARGET_DIR=$WGPU/jimb-wasm-target \
     RUSTFLAGS=--cfg=web_sys_unstable_apis \
     cargo clippy \
