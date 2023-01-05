@@ -17,6 +17,9 @@ WGPU_BACKEND=vulkan                             \
 CARGO_TARGET_DIR=$WGPU/jimb-wasm-target \
     RUSTFLAGS=--cfg=web_sys_unstable_apis \
     cargo clippy \
-    --target wasm32-unknown-unknown
+    --target wasm32-unknown-unknown \
+    --features="gles"
 
-cargo doc -p wgpu-core --document-private-items
+cargo doc -p wgpu-core --document-private-items \
+      --features="vulkan gles trace replay serial-pass id32 wgsl vulkan-portability" 
+#      --all-features
