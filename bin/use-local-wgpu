@@ -31,16 +31,12 @@ sed gfx/wgpu_bindings/moz.build                         \
     -e 's|/third_party/rust/|%/home/jimb/rust/wgpu/|'
 
 sed supply-chain/config.toml \
-    --regexp-extended                           \
+    --regexp-extended \
     --in-place=~ \
-    -e '
-        /^\[policy.(naga|wgpu-core|wgpu-hal|wgpu-types)\]/,/^$/ {
-            s/audit-as-crates-io = .*/audit-as-crates-io = false/
-        }
-       '
+    -e '/^\[policy.metal]/,/^$/d'
 
 cargo update -p naga
 
+mach cargo vet regenerate exemptions
 mach cargo vet prune
-
 mach vendor rust --ignore-modified
