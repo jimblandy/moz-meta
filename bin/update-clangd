@@ -1,3 +1,8 @@
 #!/usr/bin/env bash
 
 mach build-backend --backend=CompileDB
+
+if ! [ -L compile_commands.json ]; then
+    echo >&2
+    echo "warning: no compile_commands.json symlink in current directory" >&2
+fi
