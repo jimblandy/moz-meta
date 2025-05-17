@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -eu
+root=$(hg root)
+
+if ! [ -d "$root/third_party/rust/wgpu-core" ]; then
+   echo "Run in Mozilla hg checkout" >&2
+   exit 1
+fi
+
+cd "$root/third_party/rust/wgpu-core"
+rm -rf target Cargo.lock
