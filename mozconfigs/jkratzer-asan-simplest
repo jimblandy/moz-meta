@@ -1,14 +1,12 @@
-mk_add_options AUTOCLOBBER=1
-mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/objdir-ff-asan-fuzzing-pernosco
-mk_add_options MOZ_MAKE_FLAGS=-j26
+mk_add_options MOZ_OBJDIR=obj-jkratzer-asan-simplest
 
 # Ensure you set this to your CLANG_HOME path
-export CLANG_HOME="/home/jkratzer/.mozbuild/clang"
+export CLANG_HOME="/home/jimb/.mozbuild/clang"
 
 # Set CC/CXX based on CLANG_HOME
 export CC="$CLANG_HOME/bin/clang"
 export CXX="$CLANG_HOME/bin/clang++"
-export LLVM_CONFIG="$CLANG_HOME/bin/llvm-config"
+# export LLVM_CONFIG="$CLANG_HOME/bin/llvm-config"
 export LLVM_SYMBOLIZER="$CLANG_HOME/bin/llvm-symbolizer"
 export SANFLAGS="-fsanitize=address"
 
@@ -25,4 +23,4 @@ ac_add_options --disable-elf-hack
 
 # We still need to build with debug symbols
 ac_add_options --disable-debug
-ac_add_options --enable-optimize="-O0 -g
+ac_add_options --enable-optimize="-O1 -g"
