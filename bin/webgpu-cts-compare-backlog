@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -eu
+
+export RUST_LOG=warn
+
+script='
+[
+    .[].tests[] |
+    select(
+        (.properties.implementation_status // {}) |
+        any(.[][]; . == "Backlog")
+    )
+] |
+length'
+
+hg --quiet checkout tip^
+hg parent
+moz-webgpu-cts dump-json | jaq "$script"
+
+hg --quiet checkout tip
+hg parent
+moz-webgpu-cts dump-json | jaq "$script"

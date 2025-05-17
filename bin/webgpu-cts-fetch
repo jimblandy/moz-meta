@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -eux
+
+changeset=$1
+
+RESULTS=$HOME/moz/webgpu-cts-results
+if ! [ -d "$RESULTS" ]; then
+    echo "Results directory doesn't exist: $RESULTS" >&2
+    exit 1
+fi   
+
+treeherder-dl \
+    --out-dir "$RESULTS" \
+    --job-type-re '.*web-platform-tests-webgpu.*' \
+    --artifact public/test_info/wptreport.json \
+    try:$changeset

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -eux
+
+RESULTS=$HOME/moz/webgpu-cts-results
+
+treeherder-dl --out-dir "$RESULTS" \
+              --job-type-re '.*web-platform-tests-webgpu.*' \
+              --artifact public/test_info/wptreport.json \
+              try:$1
+
+moz-webgpu-cts update-expected \
+               --preset reset-all \
+               --glob "${RESULTS}/**/wptreport.json"
+
+moz-webgpu-cts update-backlog promote perma-passing

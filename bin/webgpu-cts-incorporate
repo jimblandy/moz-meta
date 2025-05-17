@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -eux
+
+changeset=$1
+
+RESULTS=$HOME/moz/webgpu-cts-results
+if ! [ -d "$RESULTS" ]; then
+    echo "Results directory doesn't exist: $RESULTS" >&2
+    exit 1
+fi   
+
+moz webgpu-cts-fetch "$changeset"
+
+moz-webgpu-cts update-expected                          \
+    --glob "${RESULTS}/$changeset/**/wptreport.json"    \
+    --preset reset-contradictory                        \
+    --on-skip-only ignore
