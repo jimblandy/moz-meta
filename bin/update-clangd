@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-mach build-backend --backend=CompileDB
+mach build-backend --backend Clangd
 
 if ! [ -L compile_commands.json ]; then
     echo >&2
