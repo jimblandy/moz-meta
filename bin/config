@@ -30,5 +30,5 @@ ln -s $config mozconfig
 
 build=$(mozconfig-objdir)
 rm -f compile_commands.json
-ln -s -f $build/compile_commands.json compile_commands.json
+ln -s -f $build/clangd/compile_commands.json compile_commands.json
 
