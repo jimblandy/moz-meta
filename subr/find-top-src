@@ -11,7 +11,7 @@ while true; do
             ;;
     esac
 
-    if [ -d .hg -o -d .git ]; then
+    if [ -d .hg -o -e .git ]; then
         echo "$PWD"
         exit 0
     fi
