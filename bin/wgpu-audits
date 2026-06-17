@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -eu
+
+wgpu_version=$1
+old_commit=$2
+new_commit=$3
+
+crates='
+    naga
+    wgpu-core
+    wgpu-core-deps-apple
+    wgpu-core-deps-windows-linux-android
+    wgpu-hal
+    wgpu-naga-bridge
+    wgpu-types
+'
+
+for crate in $crates; do
+    mach cargo vet certify --criteria=safe-to-deploy ${crate} "${wgpu_version}@git:${old_commit}" "${wgpu_version}@git:${new_commit}" 
+done
