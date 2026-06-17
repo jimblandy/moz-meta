@@ -1,0 +1,27 @@
+mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/objdir-ff-debug
+mk_add_options AUTOCLOBBER=1
+
+export ASAN_OPTIONS="detect_leaks=0"
+
+# Ensure you set this to your LLVM_HOME path
+export LLVM_HOME="$HOME/.mozbuild/clang"
+
+# Set CC/CXX based on LLVM_HOME
+export CC="$LLVM_HOME/bin/clang"
+export CXX="$LLVM_HOME/bin/clang++"
+
+# This will ensure the symbolizer is packaged with the binary
+export LLVM_SYMBOLIZER="$LLVM_HOME/bin/llvm-symbolizer"
+
+ac_add_options --disable-elf-hack
+ac_add_options --disable-jemalloc
+ac_add_options --disable-crashreporter
+
+# Keep symbols to symbolize ASan traces later
+export MOZ_DEBUG_SYMBOLS=1
+ac_add_options --enable-debug-symbols
+ac_add_options --disable-install-strip
+ac_add_options --enable-debug
+
+# Enable fuzzing
+ac_add_options --enable-fuzzing
