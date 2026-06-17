@@ -12,7 +12,10 @@ fi
 
 moz webgpu-cts-fetch "$changeset"
 
-moz-webgpu-cts update-expected                          \
-    --glob "${RESULTS}/$changeset/**/wptreport.json"    \
-    --preset reset-contradictory                        \
-    --on-skip-only ignore
+moz-webgpu-cts update-expected                                  \
+               --glob "${RESULTS}/$changeset/**/wptreport.json" \
+               --implementation-status backlog                  \
+               --on-skip-only ignore
+
+# We shouldn't need `--on-skip-only`, all tests should run, boo
+moz-webgpu-cts update-backlog promote perma-passing
